@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.lixy.dao.IOrderDetailDao">
+
+	<resultMap id="orderDetailResultMap" type="com.lixy.boothigh.bean.OrderDetail">
+		<result column="id" property="id" />
+		<result column="orderId" property="orderId" />
+		<result column="goodsId" property="goodsId" />
+		<result column="goodsNum" property="goodsNum" />
+		<result column="cDate" property="cDate" />
+	</resultMap>
+
+    <insert id="addOrderDetail" parameterType="com.lixy.boothigh.bean.OrderDetail">
+    	insert into orderdetail (
+    	<trim suffixOverrides=",">
+			<if test="orderId != null">
+		      orderId,
+		    </if>
+			<if test="goodsId != null">
+		      goodsId,
+		    </if>
+		    <if test="goodsNum != null">
+		      goodsNum,
+		    </if>
+			<if test="cDate != null">
+		      cDate,
+		    </if>
+		</trim>   
+		)VALUES(
+		<trim suffixOverrides=",">
+			<if test="orderId != null">
+		  		#{orderId},
+			</if>
+			<if test="goodsId != null">
+		  		#{goodsId},
+			</if>
+			<if test="goodsNum != null">
+		  		#{goodsNum},
+			</if>
+			<if test="cDate != null">
+		  		#{cDate},
+			</if>
+		</trim>
+		)
+    </insert>
+    
+    <select id="findOrderDetail" parameterType="java.util.Map" resultMap="orderDetailResultMap">
+    	select * from orderdetail  
+    	<where>
+    		<if test="orderId != null">
+		  		#{orderId},
+			</if>
+			<if test="goodsId != null">
+		  		#{goodsId},
+			</if>
+			<if test="goodsNum != null">
+		  		#{goodsNum},
+			</if>
+			<if test="cDate != null">
+		  		#{cDate},
+			</if>
+    	</where>
+    </select>
+</mapper>
