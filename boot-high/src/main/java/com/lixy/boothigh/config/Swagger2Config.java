@@ -14,13 +14,12 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import java.sql.Timestamp;
 
 /**
- * @author yuanyang
+ * @author
  * @Description:swagger配置类
  * @date 2018/3/23 10:55
  */
 @Configuration
 @Profile({"!release", "!pro", "!master"})
-@EnableSwagger2
 public class Swagger2Config {
 
     @Bean
