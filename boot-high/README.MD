@@ -1,0 +1,6 @@
+1.多数据的使用参考OrderServiceImpl，OrderDetailServiceImpl
+2.默认数据源为参考StudentServiceImpl
+3.线程启动使用参考InitStartUp，ExcelSynThread，DataInsertThread
+4.MvcInterceptorConfig配置拦截器
+5.SystemLogAspect进行aop的控制
+6.WebConfig对过滤器和监听器的servlet注入

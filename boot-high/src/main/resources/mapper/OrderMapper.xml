@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.lixy.dao.IOrderDao">
+<mapper namespace="com.lixy.boothigh.dao.IOrderDao">
 
 	<resultMap id="orderResultMap" type="com.lixy.boothigh.bean.Order">
 		<result column="id" property="id" />
