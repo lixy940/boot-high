@@ -6,7 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-
+/**
+ * @Author: MR LIS
+ * @Description: 读取配置文件信息
+ * @Date: 11:10 2018/4/25
+ * @return
+ */
 public class PropertyReaderUtils {
 
     /** 属性值映射 */
