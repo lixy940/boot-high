@@ -12,5 +12,4 @@ public class BootHighApplicationTests {
 	@Test
 	public void contextLoads() {
 	}
-
 }
