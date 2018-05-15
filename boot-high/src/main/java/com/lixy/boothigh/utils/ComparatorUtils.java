@@ -25,13 +25,10 @@ public class ComparatorUtils {
             }
         });
 
-        Map<K, V> result = new LinkedHashMap<>();
-        for (Map.Entry<K, V> entry : list) {
-            result.put(entry.getKey(), entry.getValue());
-        }
-
-        return result;
+        return setSortKvMap(list);
     }
+
+
     /**
      * @Author: MR LIS
      * @Description: 根据map对象value倒序排
@@ -48,6 +45,11 @@ public class ComparatorUtils {
             }
         });
 
+        return setSortKvMap(list);
+    }
+
+
+    private static <K, V extends Comparable<? super V>> Map<K, V> setSortKvMap(List<Map.Entry<K, V>> list) {
         Map<K, V> result = new LinkedHashMap<>();
         for (Map.Entry<K, V> entry : list) {
             result.put(entry.getKey(), entry.getValue());
