@@ -1,6 +1,8 @@
 package com.lixy.boothigh.controller;
 
 import com.lixy.boothigh.constants.BConstant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,6 +20,8 @@ import java.util.UUID;
 @RequestMapping("/import")
 @Controller
 public class ExcelImportController {
+
+    private final static Logger logger = LoggerFactory.getLogger(ExcelImportController.class);
 
 
     @GetMapping("/index")
