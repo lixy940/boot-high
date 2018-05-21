@@ -31,7 +31,6 @@ public class TxtHandlerUtils {
             // 按行读取文本，直到末尾
             while ((line = reader.readLine()) != null) {
                 // 打印当前行字符串
-                System.out.println(line);
                 lineList.add(line);
             }
         } catch (FileNotFoundException e) {
@@ -71,7 +70,7 @@ public class TxtHandlerUtils {
     }
 
     public static void main(String[] args) {
-        List<String> strings = readFile("F://tonghuaqingdan.txt");
+        List<String> strings = readLargeFile("C:\\Users\\admin\\Desktop\\解析文件\\tonghuaqingdan.csv");
     }
 
 }
