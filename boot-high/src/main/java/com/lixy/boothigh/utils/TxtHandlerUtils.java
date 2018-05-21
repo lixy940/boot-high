@@ -42,6 +42,34 @@ public class TxtHandlerUtils {
         return lineList;
     }
 
+
+    /**
+     * @Author: MR LIS
+     * @Description: 读取文件，并返回行集合，带缓冲，读取大数据文件时，一次多读取数据回来，减少io开销
+     * @Date: 16:44 2018/5/21
+     * @param path 读取
+     * @return
+     */
+    public static List<String> readLargeFile(String path) {
+        List<String> lineList = new ArrayList<>();
+        try {
+            // 读取到输入流中
+            InputStream input = new FileInputStream(path);
+            // 创建BufferedReader
+            BufferedReader reader = new BufferedReader(new InputStreamReader(input,  Charset.forName("UTF-8")),10 * 1024 * 1024);//10M缓存
+            String line = null;
+            // 按行读取文本，直到末尾
+            while ((line = reader.readLine()) != null) {
+                lineList.add(line);
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return lineList;
+    }
+
     public static void main(String[] args) {
         List<String> strings = readFile("F://tonghuaqingdan.txt");
     }
