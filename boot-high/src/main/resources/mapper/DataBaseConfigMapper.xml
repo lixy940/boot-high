@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lixy.boothigh.dao.DataBaseConfigMapper">
+    <resultMap id="BaseResultMap" type="com.lixy.boothigh.bean.DataBaseConfig">
+        <id column="db_id" property="dbId" jdbcType="INTEGER"/>
+        <result column="db_name" property="dbName" jdbcType="VARCHAR"/>
+        <result column="db_type" property="dbType" jdbcType="VARCHAR"/>
+        <result column="db_ip" property="dbIp" jdbcType="VARCHAR"/>
+        <result column="db_port" property="dbPort" jdbcType="VARCHAR"/>
+        <result column="db_server_name" property="dbServerName" jdbcType="VARCHAR"/>
+        <result column="db_user" property="dbUser" jdbcType="VARCHAR"/>
+        <result column="db_password" property="dbPassword" jdbcType="VARCHAR"/>
+        <result column="status" property="status" jdbcType="INTEGER"/>
+        <result column="create_person_id" property="createPersonId" jdbcType="VARCHAR"/>
+    </resultMap>
+ <sql id="Base_Column_List">
+    db_id, db_name, db_type, db_ip, db_port, db_server_name, db_password, status,
+    create_person_id,db_user
+  </sql>
+
+    <!--查询单条记录-->
+    <select id="selectOne" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        from database_config
+        where db_id = #{dbId,jdbcType=INTEGER}
+    </select>
+
+</mapper>
