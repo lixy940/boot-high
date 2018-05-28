@@ -9,7 +9,10 @@ package com.lixy.boothigh.enums;
 public enum DriverNameEnum {
 
     DRIVER_MYSQL("com.mysql.jdbc.Driver"),
-    DRIVER_ORACLE("oracle.jdbc.driver.OracleDriver");
+    DRIVER_ORACLE("oracle.jdbc.driver.OracleDriver"),
+    DRIVER_POSTGRES("org.postgresql.Driver"),
+
+    ;
 
     private String driverName;
 

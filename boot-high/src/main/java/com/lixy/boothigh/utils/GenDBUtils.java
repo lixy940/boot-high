@@ -1,8 +1,8 @@
 package com.lixy.boothigh.utils;
 
-
 import com.lixy.boothigh.bean.DataBaseConfig;
 import com.lixy.boothigh.enums.DBTypeEnum;
+import com.lixy.boothigh.enums.DbDataTypeEnum;
 import com.lixy.boothigh.enums.DriverNameEnum;
 import com.lixy.boothigh.vo.page.ColumnInfoVO;
 import com.lixy.boothigh.vo.page.SandPageViewVO;
@@ -16,7 +16,7 @@ import java.util.Map;
 
 /**
  * @Author: MR LIS
- * @Description:JDBC连接工具 需要保证各种数据库连接的驱动都被maven依赖进来
+ * @Description:JDBC连接工具 mysql与tidb原理差不多，驱动一样
  * @Date: Create in 17:41 2018/5/24
  * @Modified By:
  */
@@ -41,6 +41,11 @@ public class GenDBUtils {
      * oracle 查询语句前缀
      */
     private static String SQL_ORACLE__PREFIX = "select * from user_tab_columns a LEFT JOIN user_col_comments b ON a.table_name=b.table_name AND a.COLUMN_NAME=b.COLUMN_NAME where a.table_name=";
+
+    /**
+     * postgres前缀
+     */
+    private static String POSTGRES_PREFIX ="jdbc:postgresql://";
     /**
      * mysql字段属性、注释、数据类型
      */
@@ -57,8 +62,8 @@ public class GenDBUtils {
     /**
      * 分页查询时的总记录sql和分页查询sql
      */
-    private static String PAGE_COUNT_SQL = "countSql";
-    private static String PAGE_QUERY_SQL = "querySql";
+    public static String PAGE_COUNT_SQL = "countSql";
+    public static String PAGE_QUERY_SQL = "querySql";
 
     /**
      * @Author: MR LIS
@@ -77,10 +82,10 @@ public class GenDBUtils {
             ResultSet rs = stmt.executeQuery();
             ColumnInfoVO infoVO=null;
             while (rs.next()) {
-                if (DBTypeEnum.DB_MYSQL.getDbName().equals(dataBaseConfig.getDbType())) {
-                    infoVO = new ColumnInfoVO(rs.getString(MYSQL_COLUMN_NAME), rs.getString(MYSQL_COLUMN_COMMENT), rs.getString(MYSQL_COLUMN_TYPE));
+                if (DBTypeEnum.DB_MYSQL.getDbName().equals(dataBaseConfig.getDbType())||DBTypeEnum.DB_TIDB.getDbName().equals(dataBaseConfig.getDbType())) {
+                    infoVO = new ColumnInfoVO(rs.getString(MYSQL_COLUMN_NAME), rs.getString(MYSQL_COLUMN_COMMENT), convertDataType(rs.getString(MYSQL_COLUMN_TYPE)));
                 }else if(DBTypeEnum.DB_ORACLE.getDbName().equals(dataBaseConfig.getDbType())){
-                    infoVO = new ColumnInfoVO(rs.getString(ORACLE_COLUMN_NAME), rs.getString(ORACLE_COLUMN_COMMENT), rs.getString(ORACLE_COLUMN_TYPE));
+                    infoVO = new ColumnInfoVO(rs.getString(ORACLE_COLUMN_NAME), rs.getString(ORACLE_COLUMN_COMMENT), convertDataType(rs.getString(ORACLE_COLUMN_TYPE)));
                 }
                 voList.add(infoVO);
             }
@@ -101,13 +106,17 @@ public class GenDBUtils {
     public static Connection getConnection(DataBaseConfig dataBaseConfig) {
         Connection conn = null;
         try {
-            if (DBTypeEnum.DB_MYSQL.getDbName().equals(dataBaseConfig.getDbType())) {
+            if (DBTypeEnum.DB_MYSQL.getDbName().equals(dataBaseConfig.getDbType())||DBTypeEnum.DB_TIDB.getDbName().equals(dataBaseConfig.getDbType())) {
                 Class.forName(DriverNameEnum.DRIVER_MYSQL.getDriverName());
                 String url = MYSQL_PREFIX + dataBaseConfig.getDbIp() + ":" + dataBaseConfig.getDbPort() + "/" + dataBaseConfig.getDbServerName() + MYSQL_SUFFIX;
                 conn = DriverManager.getConnection(url, dataBaseConfig.getDbUser(), dataBaseConfig.getDbPassword());
             }else if(DBTypeEnum.DB_ORACLE.getDbName().equals(dataBaseConfig.getDbType())){
                 Class.forName(DriverNameEnum.DRIVER_ORACLE.getDriverName());
                 String url = ORACLE_PREFIX + dataBaseConfig.getDbIp() + ":" + dataBaseConfig.getDbPort() + "/" + dataBaseConfig.getDbServerName();
+                conn = DriverManager.getConnection(url, dataBaseConfig.getDbUser(), dataBaseConfig.getDbPassword());
+            } else if (DBTypeEnum.DB_POSTGRESQL.equals(dataBaseConfig.getDbType())) {
+                Class.forName(DriverNameEnum.DRIVER_POSTGRES.getDriverName());
+                String url = POSTGRES_PREFIX + dataBaseConfig.getDbIp() + ":" + dataBaseConfig.getDbPort() + "/" + dataBaseConfig.getDbServerName();
                 conn = DriverManager.getConnection(url, dataBaseConfig.getDbUser(), dataBaseConfig.getDbPassword());
             }
         } catch (ClassNotFoundException e) {
@@ -126,7 +135,7 @@ public class GenDBUtils {
      */
     private static String getColumnPropertySQL(String dbType,String tableName) {
         String sql = "";
-        if (DBTypeEnum.DB_MYSQL.getDbName().equals(dbType)) {
+        if (DBTypeEnum.DB_MYSQL.getDbName().equals(dbType)||DBTypeEnum.DB_TIDB.getDbName().equals(dbType)) {
             sql =  SQL_MYSQL_PREFIX + tableName;
         }else if(DBTypeEnum.DB_ORACLE.getDbName().equals(dbType)){
             sql =  SQL_ORACLE__PREFIX + "'"+tableName+"'";
@@ -156,7 +165,7 @@ public class GenDBUtils {
      * @Date: 10:05 2018/5/25
      * @return
      */
-    public static List<List<Object>>  executePageRecord(DataBaseConfig dataBaseConfig, String querySql){
+    public static List<List<Object>>  executePageRecord(DataBaseConfig dataBaseConfig,String querySql){
         List<List<Object>> listList = new ArrayList<>();
         //查询总记录数
         Connection conn = getConnection(dataBaseConfig);
@@ -202,7 +211,7 @@ public class GenDBUtils {
      * @Date: 10:05 2018/5/25
      * @return
      */
-    public static int  executePageTotalCount(DataBaseConfig dataBaseConfig, String countSql){
+    public static int  executePageTotalCount(DataBaseConfig dataBaseConfig,String countSql){
         //查询总记录数
         Connection conn = getConnection(dataBaseConfig);
         PreparedStatement stmt=null;
@@ -244,13 +253,13 @@ public class GenDBUtils {
         }
         String countSql = "";
         String querySql = "";
-        if (DBTypeEnum.DB_ORACLE.getDbName().equalsIgnoreCase(dbType)) {
-            countSql = "select count(*) as count from " + tableName + " t";
-            querySql = "select * from (select T.*,ROWNUM RN from " + tableName + "  T where ROWNUM <= " + end + ") where RN >" + start;
-
-        } else if (DBTypeEnum.DB_MYSQL.getDbName().equalsIgnoreCase(dbType)) {
+        if (DBTypeEnum.DB_MYSQL.getDbName().equalsIgnoreCase(dbType)||DBTypeEnum.DB_TIDB.getDbName().equals(dbType)) {
             countSql = "select count(*) as count from " + tableName + " t";
             querySql = "select * from " +tableName+ " limit " + start + "," + size;
+
+        }else if (DBTypeEnum.DB_ORACLE.getDbName().equalsIgnoreCase(dbType)) {
+            countSql = "select count(*) as count from " + tableName + " t";
+            querySql = "select * from (select T.*,ROWNUM RN from " + tableName + "  T where ROWNUM <= " + end + ") where RN >" + start;
 
         } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equalsIgnoreCase(dbType)) {
             countSql = "select count(*) as count from " + tableName + " t";
@@ -261,6 +270,66 @@ public class GenDBUtils {
         result.put(PAGE_COUNT_SQL, countSql);
         result.put(PAGE_QUERY_SQL, querySql);
         return result;
+    }
+
+    /**
+     * mysql与oracle参考对比，参考：https://blog.csdn.net/superit401/article/details/51565119
+     */
+    //int集合
+    private static List<String> intList = new ArrayList<String>(){{
+        //mysql数据库
+        add("int");add("integer");add("tinyint");add("smallint");add("bigint");add("bigint");add("mediumint");add("numeric");
+        //oracle数据库
+        add("number");
+    }};
+    //double 集合
+    private static List<String> floatList = new ArrayList<String>(){{
+        //mysql数据库
+        add("float");add("double");add("decimal");add("real");
+        //oracle数据库
+    }};
+
+    //date 集合
+    private static List<String> dateList = new ArrayList<String>(){{
+
+        //mysql数据库
+        add("date");add("datetime");add("time");add("timestamp");
+        //oracle数据库
+
+    }};
+    //string 集合
+    private static List<String> stringList = new ArrayList<String>(){{
+        //mysql数据库
+        add("char");add("varchar");add("text");add("tinytext");add("enum");
+        //oracle数据库
+    }};
+
+    /**
+     * @Author: MR LIS
+     * @Description: 转换mysql的数据类型
+     * @Date: 10:56 2018/5/28
+     * @return
+     */
+    private static String convertDataType(String dataType) {
+        for (String s : intList) {
+            if(dataType.toLowerCase().indexOf(s.toLowerCase())!=-1)
+                return DbDataTypeEnum.NUMBER.getType();
+        }
+
+        for (String s : floatList) {
+            if(dataType.toLowerCase().indexOf(s.toLowerCase())!=-1)
+                return DbDataTypeEnum.FLOAT.getType();
+        }
+        for (String s : dateList) {
+            if(dataType.toLowerCase().indexOf(s.toLowerCase())!=-1)
+                return DbDataTypeEnum.DATE.getType();
+        }
+        for (String s : stringList) {
+            if(dataType.toLowerCase().indexOf(s.toLowerCase())!=-1)
+                return DbDataTypeEnum.STRING.getType();
+        }
+
+        return DbDataTypeEnum.STRING.getType();
     }
 
 
