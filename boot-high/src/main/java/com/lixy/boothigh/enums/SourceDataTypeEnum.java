@@ -1,8 +1,8 @@
 package com.lixy.boothigh.enums;
 
 /**
- * Created by Guopengzhan on 2018/5/23.
- * 沙盘数据类型
+ * Created by  on 2018/5/23.
+ * 数据类型
  */
 public enum SourceDataTypeEnum {
 
