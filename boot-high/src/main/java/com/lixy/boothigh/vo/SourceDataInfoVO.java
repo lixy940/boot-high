@@ -1,7 +1,7 @@
 package com.lixy.boothigh.vo;
 
 /**
- * Created by Guopengzhan on 2018/5/24.
+ * Created by  on 2018/5/24.
  * 数据源的基本信息
  */
 public class SourceDataInfoVO {
