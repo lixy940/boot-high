@@ -24,7 +24,7 @@ CREATE TABLE `database_config` (
   `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `create_person_id` varchar(36) DEFAULT NULL COMMENT '创建人用户id',
   PRIMARY KEY (`db_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='沙盘数据库连接配置';
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='数据库连接配置';
 
 -- ----------------------------
 -- Records of database_config
