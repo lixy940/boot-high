@@ -34,18 +34,33 @@ public class GenDBUtils {
      */
     private static String ORACLE_PREFIX = "jdbc:oracle:thin:@//";
     /**
-     * mysql查询语句前缀
-     */
-    private static String SQL_MYSQL_PREFIX = "show full columns from ";
-    /**
-     * oracle 查询语句前缀
-     */
-    private static String SQL_ORACLE__PREFIX = "select * from user_tab_columns a LEFT JOIN user_col_comments b ON a.table_name=b.table_name AND a.COLUMN_NAME=b.COLUMN_NAME where a.table_name=";
-
-    /**
      * postgres前缀
      */
     private static String POSTGRES_PREFIX ="jdbc:postgresql://";
+
+    /**
+     * mysql查询列信息语句前缀
+     */
+    private static String SQL_MYSQL_PREFIX = "show full columns from ";
+    /**
+     * oracle 查询列信息语句前缀
+     */
+    private static String SQL_ORACLE__PREFIX = "select * from user_tab_columns a LEFT JOIN user_col_comments b ON a.table_name=b.table_name AND a.COLUMN_NAME=b.COLUMN_NAME where a.table_name=";
+    /**
+     * postgres 查询列信息语句前缀
+     */
+    private static String SQL_POSTGRES__PREFIX = "SELECT\n" +
+            "\tC.relname,\n" +
+            "\tcol_description (A.attrelid, A.attnum) AS description,\n" +
+            "\tformat_type (A.atttypid, A.atttypmod) AS data_type,\n" +
+            "\tA.attname AS column_name\n" +
+            "FROM\n" +
+            "\tpg_class AS C,\n" +
+            "\tpg_attribute AS A\n" +
+            "WHERE A.attrelid = C.oid\n" +
+            "AND A.attnum > 0\n" +
+            "AND C.relname = ";
+
     /**
      * mysql字段属性、注释、数据类型
      */
@@ -58,6 +73,14 @@ public class GenDBUtils {
     private static String ORACLE_COLUMN_NAME = "COLUMN_NAME";
     private static String ORACLE_COLUMN_COMMENT = "COMMENTS";
     private static String ORACLE_COLUMN_TYPE = "DATA_TYPE";
+    /**
+     * postgres字段属性、注释、数据类型
+     */
+    private static String POSTGRES_COLUMN_NAME = "column_name";
+    private static String POSTGRES_COLUMN_COMMENT = "description";
+    private static String POSTGRES_COLUMN_TYPE = "data_type";
+
+
 
     /**
      * 分页查询时的总记录sql和分页查询sql
@@ -86,12 +109,14 @@ public class GenDBUtils {
                     infoVO = new ColumnInfoVO(rs.getString(MYSQL_COLUMN_NAME), rs.getString(MYSQL_COLUMN_COMMENT), convertDataType(rs.getString(MYSQL_COLUMN_TYPE)));
                 }else if(DBTypeEnum.DB_ORACLE.getDbName().equals(dataBaseConfig.getDbType())){
                     infoVO = new ColumnInfoVO(rs.getString(ORACLE_COLUMN_NAME), rs.getString(ORACLE_COLUMN_COMMENT), convertDataType(rs.getString(ORACLE_COLUMN_TYPE)));
+                }else if(DBTypeEnum.DB_POSTGRESQL.getDbName().equals(dataBaseConfig.getDbType())){
+                    infoVO = new ColumnInfoVO(rs.getString(POSTGRES_COLUMN_NAME), rs.getString(POSTGRES_COLUMN_COMMENT), convertDataType(rs.getString(POSTGRES_COLUMN_TYPE)));
                 }
                 voList.add(infoVO);
             }
             stmt.close();
             conn.close();
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -106,15 +131,15 @@ public class GenDBUtils {
     public static Connection getConnection(DataBaseConfig dataBaseConfig) {
         Connection conn = null;
         try {
-            if (DBTypeEnum.DB_MYSQL.getDbName().equals(dataBaseConfig.getDbType())||DBTypeEnum.DB_TIDB.getDbName().equals(dataBaseConfig.getDbType())) {
+            if (DBTypeEnum.DB_MYSQL.getDbName().equals(dataBaseConfig.getDbType()) || DBTypeEnum.DB_TIDB.getDbName().equals(dataBaseConfig.getDbType())) {
                 Class.forName(DriverNameEnum.DRIVER_MYSQL.getDriverName());
                 String url = MYSQL_PREFIX + dataBaseConfig.getDbIp() + ":" + dataBaseConfig.getDbPort() + "/" + dataBaseConfig.getDbServerName() + MYSQL_SUFFIX;
                 conn = DriverManager.getConnection(url, dataBaseConfig.getDbUser(), dataBaseConfig.getDbPassword());
-            }else if(DBTypeEnum.DB_ORACLE.getDbName().equals(dataBaseConfig.getDbType())){
+            } else if (DBTypeEnum.DB_ORACLE.getDbName().equals(dataBaseConfig.getDbType())) {
                 Class.forName(DriverNameEnum.DRIVER_ORACLE.getDriverName());
                 String url = ORACLE_PREFIX + dataBaseConfig.getDbIp() + ":" + dataBaseConfig.getDbPort() + "/" + dataBaseConfig.getDbServerName();
                 conn = DriverManager.getConnection(url, dataBaseConfig.getDbUser(), dataBaseConfig.getDbPassword());
-            } else if (DBTypeEnum.DB_POSTGRESQL.equals(dataBaseConfig.getDbType())) {
+            } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equals(dataBaseConfig.getDbType())) {
                 Class.forName(DriverNameEnum.DRIVER_POSTGRES.getDriverName());
                 String url = POSTGRES_PREFIX + dataBaseConfig.getDbIp() + ":" + dataBaseConfig.getDbPort() + "/" + dataBaseConfig.getDbServerName();
                 conn = DriverManager.getConnection(url, dataBaseConfig.getDbUser(), dataBaseConfig.getDbPassword());
@@ -122,6 +147,8 @@ public class GenDBUtils {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return conn;
@@ -139,6 +166,8 @@ public class GenDBUtils {
             sql =  SQL_MYSQL_PREFIX + tableName;
         }else if(DBTypeEnum.DB_ORACLE.getDbName().equals(dbType)){
             sql =  SQL_ORACLE__PREFIX + "'"+tableName+"'";
+        }else if(DBTypeEnum.DB_POSTGRESQL.getDbName().equals(dbType)){
+            sql = SQL_POSTGRES__PREFIX + "'"+tableName+"'" ;
         }
         return sql;
     }
@@ -150,10 +179,10 @@ public class GenDBUtils {
      * @Date: 10:05 2018/5/25
      * @return
      */
-    public static SandPageViewVO executePageQuery(DataBaseConfig dataBaseConfig, String tableName, int pageNum, int pageSize){
+    public static SandPageViewVO executePageQuery(DataBaseConfig dataBaseConfig, String tableName, int pageNum,int pageSize){
         int start = (pageNum-1)*pageSize;
         int end = pageSize*pageNum;
-        Map<String, String> map = pagingSql(dataBaseConfig.getDbType(), tableName, pageSize, start, end);
+        Map<String, String> map = pagingSql(dataBaseConfig.getDbType(), tableName,dataBaseConfig.getDbTableSchema(), pageSize, start, end);
         SandPageViewVO sandPageViewVO = new SandPageViewVO(executePageTotalCount(dataBaseConfig, map.get(PAGE_COUNT_SQL)), executePageRecord(dataBaseConfig, map.get(PAGE_QUERY_SQL)));
         return sandPageViewVO;
     }
@@ -247,7 +276,7 @@ public class GenDBUtils {
      * @Date: 9:56 2018/5/25
      * @return
      */
-    public static Map<String, String> pagingSql(String dbType, String tableName, Integer size, Integer start, Integer end) {
+    public static Map<String, String> pagingSql(String dbType, String tableName,String tableSchema, Integer size, Integer start, Integer end) {
         if (StringUtils.isEmpty(dbType) || StringUtils.isEmpty(tableName)) {
             throw new RuntimeException("sql或者数据库类型不能为空！");
         }
@@ -262,8 +291,8 @@ public class GenDBUtils {
             querySql = "select * from (select T.*,ROWNUM RN from " + tableName + "  T where ROWNUM <= " + end + ") where RN >" + start;
 
         } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equalsIgnoreCase(dbType)) {
-            countSql = "select count(*) as count from " + tableName + " t";
-            querySql = "select * from " +tableName+ " limit " + size + " offset  " + start;
+            countSql = "select count(*) as count from " +tableSchema+"."+tableName + " t";
+            querySql = "select * from " +tableSchema+"."+tableName+ " limit " + size + " offset  " + start;
 
         }
         Map<String, String> result = new HashMap<>();
@@ -331,6 +360,5 @@ public class GenDBUtils {
 
         return DbDataTypeEnum.STRING.getType();
     }
-
 
 }

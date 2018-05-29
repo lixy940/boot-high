@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lixy.boothigh.dao.PersistentResultMapper">
+    <resultMap id="BaseResultMap" type="com.lixy.boothigh.bean.PersistentResult">
+        <id column="result_id" property="resultId" jdbcType="INTEGER"/>
+        <result column="result_cname" property="resultCname" jdbcType="VARCHAR"/>
+        <result column="result_ename" property="resultEname" jdbcType="VARCHAR"/>
+        <result column="row_num" property="rowNum" jdbcType="INTEGER"/>
+        <result column="db_id" property="dbId" jdbcType="INTEGER"/>
+        <result column="status" property="status" jdbcType="INTEGER"/>
+        <result column="create_person_id" property="createPersonId" jdbcType="VARCHAR"/>
+    </resultMap>
+ <sql id="Base_Column_List">
+    result_id, result_cname, result_ename, row_num, db_id, status, create_person_id
+  </sql>
+
+    <!--查询单条记录-->
+    <select id="selectOne" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        from persistent_result
+        where result_id = #{resultId,jdbcType=INTEGER}
+    </select>
+
+    <!--查询全部记录-->
+    <select id="selectAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from persistent_result
+        order by create_time desc
+    </select>
+
+    <!--插入记录-->
+    <insert id="insertOne" parameterType="com.lixy.boothigh.bean.PersistentResult">
+        insert into persistent_result (result_cname,result_ename,row_num,db_id,create_person_id)
+        values (#{resultCname}, #{resultEname},#{rowNum}, #{dbId},#{createPersonId})
+    </insert>
+    <!--获取总记录数-->
+    <select id="selectTotalCount" resultType="java.lang.Integer">
+        select
+        count(0)
+        from persistent_result
+    </select>
+
+
+</mapper>

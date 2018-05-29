@@ -32,6 +32,10 @@ public class DataBaseConfig {
      */
     private String dbServerName;
     /**
+     * 其他字段，postgres中同一个库分为不同的模式
+     */
+    private String dbTableSchema;
+    /**
      * 用户名
      */
     private String dbUser;
@@ -127,5 +131,13 @@ public class DataBaseConfig {
 
     public void setCreatePersonId(String createPersonId) {
         this.createPersonId = createPersonId;
+    }
+
+    public String getDbTableSchema() {
+        return dbTableSchema;
+    }
+
+    public void setDbTableSchema(String dbTableSchema) {
+        this.dbTableSchema = dbTableSchema;
     }
 }
