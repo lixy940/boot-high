@@ -44,7 +44,7 @@ public class PersistentDataResultServiceImpl implements PersistentDataResultServ
         //遍历设置结果
         sandPersistentResults.stream().forEach(result -> {
             SourceDataInfoShowVO showVO = new SourceDataInfoShowVO();
-            SourceDataInfoVO sourceVO = new SourceDataInfoVO(result.getDbId(),result.getResultEname(),result.getResultCname(), SourceDataTypeEnum.Reult.getCode());
+            SourceDataInfoVO sourceVO = new SourceDataInfoVO(result.getDbId(),result.getResultEname(),result.getResultCname(), SourceDataTypeEnum.Result.getCode());
             showVO.setSourceDataInfoVO(sourceVO);
             showVO.setCount(result.getRowNum());
             showVOList.add(showVO);

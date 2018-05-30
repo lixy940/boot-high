@@ -4,12 +4,14 @@ import com.alibaba.fastjson.JSONObject;
 import com.lixy.boothigh.bean.DataBaseConfig;
 import com.lixy.boothigh.dao.DataBaseConfigMapper;
 import com.lixy.boothigh.utils.GenDBUtils;
+import com.lixy.boothigh.vo.SourceDataInfoShowVO;
 import com.lixy.boothigh.vo.page.ColumnInfoVO;
 import com.lixy.boothigh.vo.page.SandPageViewVO;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @Author: MR LIS
@@ -31,5 +33,14 @@ public class DataBaseConfigTest extends BootHighApplicationTests {
         //表分页数据
         SandPageViewVO sys_categoryinfo = GenDBUtils.executePageQuery(dataBaseConfig, "USERS", 9, 10);
         System.out.println("sys_categoryinfo = " + JSONObject.toJSONString(sys_categoryinfo));
+    }
+
+    @Test
+    public void testGetTables(){
+        DataBaseConfig dataBaseConfig = configMapper.selectOne(2);
+        List<SourceDataInfoShowVO> showVOList = GenDBUtils.getTableInfos(dataBaseConfig);
+        Optional.of(showVOList).ifPresent(list->{
+            System.out.println("JSONObject.toJSONString(list)= " + JSONObject.toJSONString(list));
+        });
     }
 }

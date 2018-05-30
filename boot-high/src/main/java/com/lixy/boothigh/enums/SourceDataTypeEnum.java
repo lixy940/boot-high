@@ -9,8 +9,9 @@ public enum SourceDataTypeEnum {
 
     EXCEL(1,"excel"),
     CSV(2,"csv"),
+    LOCAL(3,"local"),
 
-    Reult(10,"result"); //数据结果
+    Result(10,"result"); //数据结果
 
 
     private int code;

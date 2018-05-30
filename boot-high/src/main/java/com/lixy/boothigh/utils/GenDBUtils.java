@@ -4,6 +4,9 @@ import com.lixy.boothigh.bean.DataBaseConfig;
 import com.lixy.boothigh.enums.DBTypeEnum;
 import com.lixy.boothigh.enums.DbDataTypeEnum;
 import com.lixy.boothigh.enums.DriverNameEnum;
+import com.lixy.boothigh.enums.SourceDataTypeEnum;
+import com.lixy.boothigh.vo.SourceDataInfoShowVO;
+import com.lixy.boothigh.vo.SourceDataInfoVO;
 import com.lixy.boothigh.vo.page.ColumnInfoVO;
 import com.lixy.boothigh.vo.page.SandPageViewVO;
 import org.apache.commons.lang3.StringUtils;
@@ -41,15 +44,15 @@ public class GenDBUtils {
     /**
      * mysql查询列信息语句前缀
      */
-    private static String SQL_MYSQL_PREFIX = "show full columns from ";
+    private static String COLUMN_MYSQL_PREFIX = "show full columns from ";
     /**
      * oracle 查询列信息语句前缀
      */
-    private static String SQL_ORACLE__PREFIX = "select * from user_tab_columns a LEFT JOIN user_col_comments b ON a.table_name=b.table_name AND a.COLUMN_NAME=b.COLUMN_NAME where a.table_name=";
+    private static String COLUMN_ORACLE__PREFIX = "select a.COLUMN_NAME,a.DATA_TYPE,b.COMMENTS from user_tab_columns a LEFT JOIN user_col_comments b ON a.table_name=b.table_name AND a.COLUMN_NAME=b.COLUMN_NAME where a.table_name=";
     /**
      * postgres 查询列信息语句前缀
      */
-    private static String SQL_POSTGRES__PREFIX = "SELECT\n" +
+    private static String COLUMN_POSTGRES__PREFIX = "SELECT\n" +
             "\tC.relname,\n" +
             "\tcol_description (A.attrelid, A.attnum) AS description,\n" +
             "\tformat_type (A.atttypid, A.atttypmod) AS data_type,\n" +
@@ -89,6 +92,25 @@ public class GenDBUtils {
     public static String PAGE_QUERY_SQL = "querySql";
 
     /**
+     * mysql库对应库对应的所有表sql
+     */
+    private static String TABLE_MYSQL_PREFIX = "select table_name, table_comment,table_rows as row_num from information_schema.tables where table_schema = ";
+    private static String TABLE_ORACLE_PREFIX = "select t.table_name as table_name,t.comments as table_comment,d.num_rows as row_num  from user_tab_comments t left join dba_tables d on t.table_name=d.table_name and owner=";
+    /**
+     * 表名
+     */
+    private static String TABLE_NAME = "table_name";
+    /**
+     * 表备注
+     */
+    private static String TABLE_COMMENT = "table_comment";
+    /**
+     * 表总记录数
+     */
+    private static String TABLE_ROWNUM = "row_num";
+
+
+    /**
      * @Author: MR LIS
      * @Description:获取数据库表的字段名、注释、数据类型
      * @Date: 17:45 2018/5/24
@@ -99,10 +121,11 @@ public class GenDBUtils {
     public static List<ColumnInfoVO> getAllColumnInfo(DataBaseConfig dataBaseConfig, String tableName) {
         List<ColumnInfoVO> voList = new ArrayList<>();
         Connection conn = getConnection(dataBaseConfig);
-        PreparedStatement stmt;
+        PreparedStatement stmt=null;
+        ResultSet rs = null;
         try {
-            stmt = conn.prepareStatement(getColumnPropertySQL(dataBaseConfig.getDbType(),tableName));
-            ResultSet rs = stmt.executeQuery();
+            stmt = conn.prepareStatement(getColumnPropertySQL(dataBaseConfig.getDbType(),tableName,dataBaseConfig.getDbTableSchema()));
+            rs = stmt.executeQuery();
             ColumnInfoVO infoVO=null;
             while (rs.next()) {
                 if (DBTypeEnum.DB_MYSQL.getDbName().equals(dataBaseConfig.getDbType())||DBTypeEnum.DB_TIDB.getDbName().equals(dataBaseConfig.getDbType())) {
@@ -114,10 +137,21 @@ public class GenDBUtils {
                 }
                 voList.add(infoVO);
             }
-            stmt.close();
-            conn.close();
         } catch (Exception e) {
             e.printStackTrace();
+        }finally {
+            try {
+                if(stmt!=null)
+                    stmt.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
+                if(conn!=null)
+                    conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
 
         return voList;
@@ -158,16 +192,17 @@ public class GenDBUtils {
      * 获取列的属性信息的sql拼接
      * @param dbType
      * @param tableName
+     * @param tableSchema postgres区分不同的模式
      * @return
      */
-    private static String getColumnPropertySQL(String dbType,String tableName) {
+    private static String getColumnPropertySQL(String dbType,String tableName,String tableSchema) {
         String sql = "";
         if (DBTypeEnum.DB_MYSQL.getDbName().equals(dbType)||DBTypeEnum.DB_TIDB.getDbName().equals(dbType)) {
-            sql =  SQL_MYSQL_PREFIX + tableName;
+            sql =  COLUMN_MYSQL_PREFIX + tableName;
         }else if(DBTypeEnum.DB_ORACLE.getDbName().equals(dbType)){
-            sql =  SQL_ORACLE__PREFIX + "'"+tableName+"'";
+            sql =  COLUMN_ORACLE__PREFIX + "'"+tableName+"'";
         }else if(DBTypeEnum.DB_POSTGRESQL.getDbName().equals(dbType)){
-            sql = SQL_POSTGRES__PREFIX + "'"+tableName+"'" ;
+            sql = COLUMN_POSTGRES__PREFIX + "'"+tableName+"'" ;
         }
         return sql;
     }
@@ -217,16 +252,7 @@ public class GenDBUtils {
         } catch (SQLException e) {
             e.printStackTrace();
         }finally {
-            try {
-                stmt.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            closeConn(conn, stmt, rs);
         }
         return listList;
 
@@ -255,16 +281,7 @@ public class GenDBUtils {
         } catch (SQLException e) {
             e.printStackTrace();
         }finally {
-            try {
-                stmt.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            try {
-                conn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            closeConn(conn, stmt, rs);
         }
 
         return count;
@@ -335,7 +352,7 @@ public class GenDBUtils {
 
     /**
      * @Author: MR LIS
-     * @Description: 转换mysql的数据类型
+     * @Description: 转换数据类型
      * @Date: 10:56 2018/5/28
      * @return
      */
@@ -359,6 +376,94 @@ public class GenDBUtils {
         }
 
         return DbDataTypeEnum.STRING.getType();
+    }
+
+    /**
+     * @Author: MR LIS
+     * @Description: 根据数据库连接+库名 得到对应的所有表信息 这里的库名为用户自己创建的，非系统库名
+     * 其中包括：每个表对应的总记录数，表名，表的注释信息等
+     * @Date: 9:43 2018/5/30
+     * @return
+     */
+    public static List<SourceDataInfoShowVO> getTableInfos(DataBaseConfig dataBaseConfig){
+        List<SourceDataInfoShowVO> showVOs = new ArrayList<>();
+        Connection conn = getConnection(dataBaseConfig);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        SourceDataInfoShowVO showVO=null;
+        try {
+            stmt = conn.prepareStatement(assembleTableSql(dataBaseConfig.getDbType(),dataBaseConfig.getDbServerName()));
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                showVO = new SourceDataInfoShowVO();
+                SourceDataInfoVO sourceVO = new SourceDataInfoVO(dataBaseConfig.getDbId(), rs.getString(TABLE_NAME), rs.getString(TABLE_COMMENT), SourceDataTypeEnum.LOCAL.getCode());
+                showVO.setCount(rs.getInt(TABLE_ROWNUM));
+                showVO.setSourceDataInfoVO(sourceVO);
+                showVOs.add(showVO);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            closeConn(conn, stmt, rs);
+        }
+
+
+        return showVOs;
+
+
+    }
+
+
+    /**
+     * @Author: MR LIS
+     * @Description: 拼接获取库对应的所有表信息
+     * @Date: 9:56 2018/5/30
+     * @param dbType 数据库类型
+     * @param serverName  库名
+     * @return
+     */
+    public static String assembleTableSql(String dbType,String serverName) {
+        if (StringUtils.isEmpty(dbType) ) {
+            throw new RuntimeException("数据库类型不能为空！");
+        }
+        String tableSql = "";
+        if (DBTypeEnum.DB_MYSQL.getDbName().equalsIgnoreCase(dbType)||DBTypeEnum.DB_TIDB.getDbName().equals(dbType)) {
+            tableSql = TABLE_MYSQL_PREFIX + "'" + serverName + "'";
+        }else if (DBTypeEnum.DB_ORACLE.getDbName().equalsIgnoreCase(dbType)) {
+            tableSql = TABLE_ORACLE_PREFIX +"'" + serverName + "'";
+        } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equalsIgnoreCase(dbType)) {
+
+        }
+
+        return tableSql;
+    }
+
+    /**
+     * 关闭连接
+     * @param stmt
+     * @param rs
+     */
+    private static void closeConn(Connection conn, PreparedStatement stmt,ResultSet rs){
+        try {
+            if(stmt!=null)
+                stmt.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        try {
+            if (rs != null) {
+                rs.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        try {
+            if(conn!=null)
+                conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
 }
