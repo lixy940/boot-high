@@ -38,9 +38,11 @@ public class DataBaseConfigTest extends BootHighApplicationTests {
     @Test
     public void testGetTables(){
         DataBaseConfig dataBaseConfig = configMapper.selectOne(2);
-        List<SourceDataInfoShowVO> showVOList = GenDBUtils.getTableInfos(dataBaseConfig);
+        List<SourceDataInfoShowVO> showVOList = GenDBUtils.getDbTableInfos(dataBaseConfig);
         Optional.of(showVOList).ifPresent(list->{
             System.out.println("JSONObject.toJSONString(list)= " + JSONObject.toJSONString(list));
         });
+        int dbTotalCount = GenDBUtils.getDbTotalCount(dataBaseConfig);
+        System.out.println("dbTotalCount = " + dbTotalCount);
     }
 }
