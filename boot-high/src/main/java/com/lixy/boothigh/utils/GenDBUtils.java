@@ -141,11 +141,11 @@ public class GenDBUtils {
             ColumnInfoVO infoVO=null;
             while (rs.next()) {
                 if (DBTypeEnum.DB_MYSQL.getDbName().equals(dataBaseConfig.getDbType())||DBTypeEnum.DB_TIDB.getDbName().equals(dataBaseConfig.getDbType())) {
-                    infoVO = new ColumnInfoVO(rs.getString(MYSQL_COLUMN_NAME), rs.getString(MYSQL_COLUMN_COMMENT), convertDataType(rs.getString(MYSQL_COLUMN_TYPE)));
+                    infoVO = new ColumnInfoVO(rs.getString(MYSQL_COLUMN_NAME), rs.getString(MYSQL_COLUMN_COMMENT)==null?"":rs.getString(MYSQL_COLUMN_COMMENT), convertDataType(rs.getString(MYSQL_COLUMN_TYPE)));
                 }else if(DBTypeEnum.DB_ORACLE.getDbName().equals(dataBaseConfig.getDbType())){
-                    infoVO = new ColumnInfoVO(rs.getString(ORACLE_COLUMN_NAME), rs.getString(ORACLE_COLUMN_COMMENT), convertDataType(rs.getString(ORACLE_COLUMN_TYPE)));
+                    infoVO = new ColumnInfoVO(rs.getString(ORACLE_COLUMN_NAME), rs.getString(ORACLE_COLUMN_COMMENT)==null?"":rs.getString(ORACLE_COLUMN_COMMENT), convertDataType(rs.getString(ORACLE_COLUMN_TYPE)));
                 }else if(DBTypeEnum.DB_POSTGRESQL.getDbName().equals(dataBaseConfig.getDbType())){
-                    infoVO = new ColumnInfoVO(rs.getString(POSTGRES_COLUMN_NAME), rs.getString(POSTGRES_COLUMN_COMMENT), convertDataType(rs.getString(POSTGRES_COLUMN_TYPE)));
+                    infoVO = new ColumnInfoVO(rs.getString(POSTGRES_COLUMN_NAME), rs.getString(POSTGRES_COLUMN_COMMENT)==null?"":rs.getString(POSTGRES_COLUMN_COMMENT), convertDataType(rs.getString(POSTGRES_COLUMN_TYPE)));
                 }
                 voList.add(infoVO);
             }
@@ -408,7 +408,7 @@ public class GenDBUtils {
             rs = stmt.executeQuery();
             while (rs.next()) {
                 showVO = new SourceDataInfoShowVO();
-                SourceDataInfoVO sourceVO = new SourceDataInfoVO(dataBaseConfig.getDbId(), rs.getString(TABLE_NAME), rs.getString(TABLE_COMMENT), SourceDataTypeEnum.LOCAL.getCode());
+                SourceDataInfoVO sourceVO = new SourceDataInfoVO(dataBaseConfig.getDbId(), rs.getString(TABLE_NAME), rs.getString(TABLE_COMMENT)==null?"":rs.getString(TABLE_COMMENT), SourceDataTypeEnum.LOCAL.getCode());
                 showVO.setCount(rs.getInt(TABLE_ROWNUM));
                 showVO.setSourceDataInfoVO(sourceVO);
                 showVOs.add(showVO);
