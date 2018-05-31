@@ -48,11 +48,11 @@ public class GenDBUtils {
     /**
      * oracle 查询列信息语句前缀
      */
-    private static String COLUMN_ORACLE__PREFIX = "select a.COLUMN_NAME,a.DATA_TYPE,b.COMMENTS from user_tab_columns a LEFT JOIN user_col_comments b ON a.table_name=b.table_name AND a.COLUMN_NAME=b.COLUMN_NAME where a.table_name=";
+    private static String COLUMN_ORACLE_PREFIX = "select a.COLUMN_NAME,a.DATA_TYPE,b.COMMENTS from user_tab_columns a LEFT JOIN user_col_comments b ON a.table_name=b.table_name AND a.COLUMN_NAME=b.COLUMN_NAME where a.table_name=";
     /**
      * postgres 查询列信息语句前缀
      */
-    private static String COLUMN_POSTGRES__PREFIX = "SELECT\n" +
+    private static String COLUMN_POSTGRES_PREFIX = "SELECT\n" +
             "\tC.relname,\n" +
             "\tcol_description (A.attrelid, A.attnum) AS description,\n" +
             "\tformat_type (A.atttypid, A.atttypmod) AS data_type,\n" +
@@ -230,9 +230,9 @@ public class GenDBUtils {
         if (DBTypeEnum.DB_MYSQL.getDbName().equals(dbType)||DBTypeEnum.DB_TIDB.getDbName().equals(dbType)) {
             sql =  COLUMN_MYSQL_PREFIX + tableName;
         }else if(DBTypeEnum.DB_ORACLE.getDbName().equals(dbType)){
-            sql =  COLUMN_ORACLE__PREFIX + "'"+tableName+"'";
+            sql =  COLUMN_ORACLE_PREFIX + "'"+tableName+"'";
         }else if(DBTypeEnum.DB_POSTGRESQL.getDbName().equals(dbType)){
-            sql = COLUMN_POSTGRES__PREFIX + "'"+tableName+"'" ;
+            sql = COLUMN_POSTGRES_PREFIX + "'"+tableName+"'" ;
         }
         return sql;
     }
