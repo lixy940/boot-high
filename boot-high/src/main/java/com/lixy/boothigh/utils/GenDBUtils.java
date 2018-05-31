@@ -91,11 +91,23 @@ public class GenDBUtils {
     public static String PAGE_COUNT_SQL = "countSql";
     public static String PAGE_QUERY_SQL = "querySql";
 
+
     /**
-     * mysql库对应库对应的所有表sql
+     * mysql库对应库对应的所有表sql,mysql针对库名
      */
     private static String TABLE_MYSQL_PREFIX = "select table_name, table_comment,table_rows as row_num from information_schema.tables where table_schema = ";
-    private static String TABLE_ORACLE_PREFIX = "select t.table_name as table_name,t.comments as table_comment,d.num_rows as row_num  from user_tab_comments t left join dba_tables d on t.table_name=d.table_name and owner=";
+    /**
+     * oracle、库对应库对应的所有表sql，oracle也是后面跟库名
+     */
+    private static String TABLE_ORACLE_PREFIX = "select t.table_name as table_name,t.comments as table_comment,d.num_rows as row_num  from user_tab_comments t left join dba_tables d on t.table_name=d.table_name and owner= ";
+    /**
+     * postgres库对应库对应的所有表sql，postgres后面跟模式名称，连接时已经确定了是哪个库
+     */
+    private static String TABLE_POSTGRES_PREFIX = "SELECT t.tablename as table_name,d.description as table_comment,c.reltuples as row_num FROM pg_tables t \n" +
+            "JOIN pg_class c ON t.tablename=c.relname\n" +
+            "left JOIN pg_description d ON c.oid = d.objoid  \n" +
+            "AND d.objsubid = '0' \n" +
+            "where t.schemaname= ";
     /**
      * 表名
      */
@@ -392,7 +404,7 @@ public class GenDBUtils {
         ResultSet rs = null;
         SourceDataInfoShowVO showVO=null;
         try {
-            stmt = conn.prepareStatement(assembleTableSql(dataBaseConfig.getDbType(),dataBaseConfig.getDbServerName()));
+            stmt = conn.prepareStatement(assembleTableSql(dataBaseConfig.getDbType(),dataBaseConfig.getDbServerName(),dataBaseConfig.getDbTableSchema()));
             rs = stmt.executeQuery();
             while (rs.next()) {
                 showVO = new SourceDataInfoShowVO();
@@ -418,12 +430,13 @@ public class GenDBUtils {
     /**
      * @Author: MR LIS
      * @Description: 拼接获取库对应的所有表信息
+     * mysql、oracle根据库名去查找下面所有自己创建的表，postgres根据模式去找，同一个库下的不同模式不要有重复的表，postgres连接时已经制定了库
      * @Date: 9:56 2018/5/30
      * @param dbType 数据库类型
      * @param serverName  库名
      * @return
      */
-    public static String assembleTableSql(String dbType,String serverName) {
+    public static String assembleTableSql(String dbType,String serverName,String tableSchema) {
         if (StringUtils.isEmpty(dbType) ) {
             throw new RuntimeException("数据库类型不能为空！");
         }
@@ -433,10 +446,11 @@ public class GenDBUtils {
         }else if (DBTypeEnum.DB_ORACLE.getDbName().equalsIgnoreCase(dbType)) {
             tableSql = TABLE_ORACLE_PREFIX +"'" + serverName + "'";
         } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equalsIgnoreCase(dbType)) {
-
+            tableSql = TABLE_POSTGRES_PREFIX + "'" + tableSchema + "'";
         }
 
         return tableSql;
+
     }
 
     /**
