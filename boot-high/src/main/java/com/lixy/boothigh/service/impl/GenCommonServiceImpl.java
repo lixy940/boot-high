@@ -58,4 +58,10 @@ public class GenCommonServiceImpl implements GenCommonService {
         Map<String, String> map = GenDBUtils.pagingSql(sandDataBaseConfig.getDbType(), tableName,sandDataBaseConfig.getDbTableSchema(), pageSize, start, end);
         return GenDBUtils.executePageRecord(sandDataBaseConfig, map.get(GenDBUtils.PAGE_QUERY_SQL));
     }
+
+    @Override
+    public void dropTable(Integer dbId, String tableName) throws ServiceException {
+        DataBaseConfig dataBaseConfig = configMapper.selectOne(dbId);
+        GenDBUtils.dropTable(dataBaseConfig, tableName);
+    }
 }

@@ -38,4 +38,12 @@ public interface GenCommonService {
      * @return
      */
     List<List<Object>> executePageQueryNotCount(Integer dbId, String tableName, Integer pageNum, Integer pageSize)throws ServiceException;;
+
+    /**
+     * @Author: MR LIS
+     * @Description: 根据库进行制定表的删除
+     * @Date: 10:22 2018/6/1
+     * @return
+     */
+    void dropTable(Integer dbId, String tableName)throws ServiceException;
 }
