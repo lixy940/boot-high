@@ -139,7 +139,10 @@ public class GenDBUtils {
      */
     private static String DB_TOTAL_COUNT = "total_count";
 
-
+    /**
+     * 删表sql
+     */
+    private static String DROP_TABLE_SQL = "DROP TABLE ";
     /**
      * @Author: MR LIS
      * @Description:获取数据库表的字段名、注释、数据类型
@@ -524,6 +527,43 @@ public class GenDBUtils {
         }
 
         return countSql;
+    }
+
+    /**
+     * @Author: MR LIS
+     * @Description: 删表操作
+     * @Date: 10:15 2018/6/1
+     * @return
+     */
+    public static void dropTable(DataBaseConfig dataBaseConfig,String tableName){
+        Connection conn = getConnection(dataBaseConfig);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = conn.prepareStatement(assembleDropTableSql(dataBaseConfig.getDbType(), tableName,dataBaseConfig.getDbTableSchema()));
+            stmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            closeConn(conn, stmt, rs);
+        }
+    }
+
+    /**
+     * 拼接删除表sql
+     * @param dbType
+     * @param tableName
+     * @return
+     */
+    private static String assembleDropTableSql(String dbType, String tableName,String tableSchema) {
+        String dropSql = "";
+        //postgres表名需要加引号
+        if (DBTypeEnum.DB_POSTGRESQL.getDbName().equalsIgnoreCase(dbType)) {
+            dropSql += DROP_TABLE_SQL + tableSchema + "." + "\"" + tableName + "\"";
+        }else{
+            dropSql += DROP_TABLE_SQL+tableName;
+        }
+        return dropSql;
     }
 
     /**

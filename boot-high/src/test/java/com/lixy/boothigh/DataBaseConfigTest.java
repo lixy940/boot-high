@@ -45,4 +45,11 @@ public class DataBaseConfigTest extends BootHighApplicationTests {
         int dbTotalCount = GenDBUtils.getDbTotalCount(dataBaseConfig);
         System.out.println("dbTotalCount = " + dbTotalCount);
     }
+
+
+    @Test
+    public void testDeleteTable(){
+        DataBaseConfig dataBaseConfig = configMapper.selectOne(6);
+        GenDBUtils.dropTable(dataBaseConfig,"xxx");
+    }
 }
