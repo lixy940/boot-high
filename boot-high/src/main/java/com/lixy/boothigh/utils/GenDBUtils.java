@@ -50,7 +50,7 @@ public class GenDBUtils {
      */
     private static String COLUMN_ORACLE_PREFIX = "select a.COLUMN_NAME,a.DATA_TYPE,b.COMMENTS from user_tab_columns a LEFT JOIN user_col_comments b ON a.table_name=b.table_name AND a.COLUMN_NAME=b.COLUMN_NAME where a.table_name=";
     /**
-     * postgres 查询列信息语句前缀
+     * postgres 查询列信息语句前缀,同一个库的不同模式下不要有重复的数据库名
      */
     private static String COLUMN_POSTGRES_PREFIX = "SELECT\n" +
             "\tC.relname,\n" +
@@ -91,7 +91,6 @@ public class GenDBUtils {
     public static String PAGE_COUNT_SQL = "countSql";
     public static String PAGE_QUERY_SQL = "querySql";
 
-
     /**
      * mysql库对应库对应的所有表sql,mysql针对库名
      */
@@ -99,7 +98,13 @@ public class GenDBUtils {
     /**
      * mysql库对应库对应的所有表记录数求和
      */
-    private static String COUNT_MYSQL_PREFIX = "select sum(table_rows) as total_count from information_schema.tables where table_schema = ";
+    private static String ROW_COUNT_MYSQL_PREFIX = "select sum(table_rows) as total_count from information_schema.tables where table_schema = ";
+
+    /**
+     * mysql库对应库对应的所有表个数
+     */
+    private static String TABLE_COUNT_MYSQL_PREFIX = "select count(TABLE_NAME) as count from  information_schema.tables where table_schema=  ";
+
     /**
      * oracle、库对应库对应的所有表sql，oracle也是后面跟库名
      */
@@ -107,7 +112,11 @@ public class GenDBUtils {
     /**
      * oracle、库对应库对应的所有表记录数求和
      */
-    private static String COUNT_ORACLE_PREFIX = "select sum(num_rows) as total_count from dba_tables where owner= ";
+    private static String ROW_COUNT_ORACLE_PREFIX = "select sum(num_rows) as total_count from dba_tables where owner= ";
+    /**
+     * oracle、库对应库对应的所有表个数
+     */
+    private static String TABLE_COUNT_ORACLE_PREFIX = "select count(TABLE_NAME) as count from dba_tables where owner= ";
     /**
      * postgres库对应库对应的所有表sql，postgres后面跟模式名称，连接时已经确定了是哪个库
      */
@@ -116,10 +125,18 @@ public class GenDBUtils {
             "left JOIN pg_description d ON c.oid = d.objoid  \n" +
             "AND d.objsubid = '0' \n" +
             "where t.schemaname= ";
-
-    private static String COUNT_POSTGRES_PREFIX = "SELECT SUM(c.reltuples) as total_count FROM pg_tables t \n" +
+    /**
+     * postgres库对应库对应的所有表记录数求和
+     */
+    private static String ROW_COUNT_POSTGRES_PREFIX = "SELECT SUM(c.reltuples) as total_count FROM pg_tables t \n" +
             "JOIN pg_class c ON t.tablename=c.relname\n" +
             "where t.schemaname= ";
+
+    /**
+     * postgres库对应库对应的所有表个数
+     */
+    private static String TABLE_COUNT_POSTGRES_PREFIX = "select count(tablename) as count from pg_tables where schemaname= ";
+
 
     /**
      * 表名
@@ -137,12 +154,20 @@ public class GenDBUtils {
     /**
      * 对应每个库的总记录数
      */
-    private static String DB_TOTAL_COUNT = "total_count";
+    private static String ROW_DB_TOTAL_COUNT = "total_count";
+
+    /**
+     * 对应每个库的表个数
+     */
+    private static String TABLE_DB_TOTAL_COUNT = "count";
 
     /**
      * 删表sql
      */
     private static String DROP_TABLE_SQL = "DROP TABLE ";
+
+
+
     /**
      * @Author: MR LIS
      * @Description:获取数据库表的字段名、注释、数据类型
@@ -389,7 +414,7 @@ public class GenDBUtils {
      * @Date: 10:56 2018/5/28
      * @return
      */
-    private static String convertDataType(String dataType) {
+    public static String convertDataType(String dataType) {
         for (String s : intList) {
             if(dataType.toLowerCase().indexOf(s.toLowerCase())!=-1)
                 return DbDataTypeEnum.NUMBER.getType();
@@ -461,36 +486,27 @@ public class GenDBUtils {
         if (StringUtils.isEmpty(dbType) ) {
             throw new RuntimeException("数据库类型不能为空！");
         }
-        String tableSql = "";
-        if (DBTypeEnum.DB_MYSQL.getDbName().equalsIgnoreCase(dbType)||DBTypeEnum.DB_TIDB.getDbName().equals(dbType)) {
-            tableSql = TABLE_MYSQL_PREFIX + "'" + serverName + "'";
-        }else if (DBTypeEnum.DB_ORACLE.getDbName().equalsIgnoreCase(dbType)) {
-            tableSql = TABLE_ORACLE_PREFIX +"'" + serverName + "'";
-        } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equalsIgnoreCase(dbType)) {
-            tableSql = TABLE_POSTGRES_PREFIX + "'" + tableSchema + "'";
-        }
-
-        return tableSql;
+        return getAssembleSqlString(dbType, serverName, tableSchema, TABLE_MYSQL_PREFIX, TABLE_ORACLE_PREFIX, TABLE_POSTGRES_PREFIX);
     }
 
 
     /**
      * @Author: MR LIS
-     * @Description: 根据数据库连接+库名 得到对应的所有表信息
+     * @Description: 根据数据库连接+库名 得到对应的所有表记录求和总记录数
      * @Date: 9:43 2018/5/30
      * @return
      */
-    public static int getDbTotalCount(DataBaseConfig dataBaseConfig){
+    public static int getDbRowTotalCount(DataBaseConfig dataBaseConfig){
 
         Connection conn = getConnection(dataBaseConfig);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         int totalCount=0;
         try {
-            stmt = conn.prepareStatement(assembleCountSql(dataBaseConfig.getDbType(),dataBaseConfig.getDbServerName(),dataBaseConfig.getDbTableSchema()));
+            stmt = conn.prepareStatement(assembleROWCountSql(dataBaseConfig.getDbType(),dataBaseConfig.getDbServerName(),dataBaseConfig.getDbTableSchema()));
             rs = stmt.executeQuery();
             while (rs.next()) {
-                totalCount = rs.getInt(DB_TOTAL_COUNT);
+                totalCount = rs.getInt(ROW_DB_TOTAL_COUNT);
             }
 
         } catch (Exception e) {
@@ -513,21 +529,13 @@ public class GenDBUtils {
      * @param serverName  库名
      * @return
      */
-    private static String assembleCountSql(String dbType,String serverName,String tableSchema) {
+    private static String assembleROWCountSql(String dbType, String serverName, String tableSchema) {
         if (StringUtils.isEmpty(dbType) ) {
             throw new RuntimeException("数据库类型不能为空！");
         }
-        String countSql = "";
-        if (DBTypeEnum.DB_MYSQL.getDbName().equalsIgnoreCase(dbType)||DBTypeEnum.DB_TIDB.getDbName().equals(dbType)) {
-            countSql = COUNT_MYSQL_PREFIX + "'" + serverName + "'";
-        }else if (DBTypeEnum.DB_ORACLE.getDbName().equalsIgnoreCase(dbType)) {
-            countSql = COUNT_ORACLE_PREFIX +"'" + serverName + "'";
-        } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equalsIgnoreCase(dbType)) {
-            countSql = COUNT_POSTGRES_PREFIX + "'" + tableSchema + "'";
-        }
-
-        return countSql;
+        return getAssembleSqlString(dbType, serverName, tableSchema, ROW_COUNT_MYSQL_PREFIX, ROW_COUNT_ORACLE_PREFIX, ROW_COUNT_POSTGRES_PREFIX);
     }
+
 
     /**
      * @Author: MR LIS
@@ -564,6 +572,73 @@ public class GenDBUtils {
             dropSql += DROP_TABLE_SQL+tableName;
         }
         return dropSql;
+    }
+
+    /**
+     * @Author: MR LIS
+     * @Description: 根据数据库连接+库名 得到库对应的表个数
+     * @Date: 9:43 2018/5/30
+     * @return
+     */
+    public static int getDbTableTotalCount(DataBaseConfig dataBaseConfig){
+
+        Connection conn = getConnection(dataBaseConfig);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        int totalCount=0;
+        try {
+            stmt = conn.prepareStatement(assembleTableCountSql(dataBaseConfig.getDbType(),dataBaseConfig.getDbServerName(),dataBaseConfig.getDbTableSchema()));
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                totalCount = rs.getInt(TABLE_DB_TOTAL_COUNT);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            closeConn(conn, stmt, rs);
+        }
+
+        return totalCount;
+
+    }
+
+    /**
+     * @Author: MR LIS
+     * @Description: 拼接获取库对应的所有表个数
+     * mysql、oracle根据库名去查找下面所有自己创建的表，postgres根据模式去找，同一个库下的不同模式不要有重复的表,postgres连接时已经制定了库
+     * @Date: 9:56 2018/5/30
+     * @param dbType 数据库类型
+     * @param serverName  库名
+     * @return
+     */
+    private static String assembleTableCountSql(String dbType, String serverName, String tableSchema) {
+        if (StringUtils.isEmpty(dbType) ) {
+            throw new RuntimeException("数据库类型不能为空！");
+        }
+        return getAssembleSqlString(dbType, serverName, tableSchema, TABLE_COUNT_MYSQL_PREFIX, TABLE_COUNT_ORACLE_PREFIX, TABLE_COUNT_POSTGRES_PREFIX);
+    }
+
+    /**
+     * 拼接公共部分
+     * @param dbType
+     * @param serverName
+     * @param tableSchema
+     * @param mysqlPrefix
+     * @param oraclePrefix
+     * @param postgresPrefix
+     * @return
+     */
+    private static String getAssembleSqlString(String dbType, String serverName, String tableSchema, String mysqlPrefix, String oraclePrefix, String postgresPrefix) {
+        String countSql = "";
+        if (DBTypeEnum.DB_MYSQL.getDbName().equalsIgnoreCase(dbType) || DBTypeEnum.DB_TIDB.getDbName().equals(dbType)) {
+            countSql = mysqlPrefix + "'" + serverName + "'";
+        } else if (DBTypeEnum.DB_ORACLE.getDbName().equalsIgnoreCase(dbType)) {
+            countSql = oraclePrefix + "'" + serverName + "'";
+        } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equalsIgnoreCase(dbType)) {
+            countSql = postgresPrefix + "'" + tableSchema + "'";
+        }
+        return countSql;
     }
 
     /**

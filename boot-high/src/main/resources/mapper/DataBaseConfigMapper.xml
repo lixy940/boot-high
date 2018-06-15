@@ -25,6 +25,7 @@
         <include refid="Base_Column_List"/>
         from database_config
         where db_id = #{dbId,jdbcType=INTEGER}
+        group by db_ip,db_port,db_server_name
     </select>
 
 </mapper>
