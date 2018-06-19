@@ -268,22 +268,54 @@ public class GenDBUtils {
 
     /**
      * @Author: MR LIS
-     * @Description: 查询分页记录结果
+     * @Description: 查询分页总记录数
      * @Date: 10:05 2018/5/25
      * @return
      */
-    public static SandPageViewVO executePageQuery(DataBaseConfig dataBaseConfig, String tableName, int pageNum,int pageSize){
-        int start = (pageNum-1)*pageSize;
-        int end = pageSize*pageNum;
-        Map<String, String> map = pagingSql(dataBaseConfig.getDbType(), tableName,dataBaseConfig.getDbTableSchema(), pageSize, start, end);
-        SandPageViewVO sandPageViewVO = new SandPageViewVO(executePageTotalCount(dataBaseConfig, map.get(PAGE_COUNT_SQL)), executePageRecord(dataBaseConfig, map.get(PAGE_QUERY_SQL)));
-        return sandPageViewVO;
+    public static int executePageTotalCount(DataBaseConfig dataBaseConfig, String tableName){
+        return queryPageTotalCount(dataBaseConfig, pagingCountSql(dataBaseConfig.getDbType(), tableName,dataBaseConfig.getDbTableSchema()));
     }
-
 
     /**
      * @Author: MR LIS
-     * @Description: 查询分页记录结果
+     * @Description: 查询总记录数
+     * @Date: 10:05 2018/5/25
+     * @return
+     */
+    public static int  queryPageTotalCount(DataBaseConfig dataBaseConfig,String countSql){
+        //查询总记录数
+        Connection conn = getConnection(dataBaseConfig);
+        PreparedStatement stmt=null;
+        ResultSet rs=null;
+        int count=0;
+        try {
+            stmt = conn.prepareStatement(countSql);
+            rs = stmt.executeQuery();
+            while (rs.next()) {
+                count=rs.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }finally {
+            closeConn(conn, stmt, rs);
+        }
+
+        return count;
+    }
+
+    /**
+     * @Author: MR LIS
+     * @Description: 查询分页记录结果,不含总记录数
+     * @Date: 10:05 2018/5/25
+     * @return
+     */
+    public static List<List<Object>>  executePage(DataBaseConfig dataBaseConfig,String tableName,int pageSize, int start, int end){
+
+        return executePageRecord(dataBaseConfig, pagingSql(dataBaseConfig.getDbType(), tableName, dataBaseConfig.getDbTableSchema(), pageSize, start, end));
+    }
+    /**
+     * @Author: MR LIS
+     * @Description: 查询分页记录结果,不含总记录数
      * @Date: 10:05 2018/5/25
      * @return
      */
@@ -320,30 +352,28 @@ public class GenDBUtils {
 
     /**
      * @Author: MR LIS
-     * @Description: 查询总记录数
-     * @Date: 10:05 2018/5/25
+     * @Description: 总记录数sql
+     * @Date: 9:56 2018/5/25
      * @return
      */
-    public static int  executePageTotalCount(DataBaseConfig dataBaseConfig,String countSql){
-        //查询总记录数
-        Connection conn = getConnection(dataBaseConfig);
-        PreparedStatement stmt=null;
-        ResultSet rs=null;
-        int count=0;
-        try {
-            stmt = conn.prepareStatement(countSql);
-            rs = stmt.executeQuery();
-            while (rs.next()) {
-                count=rs.getInt(1);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }finally {
-            closeConn(conn, stmt, rs);
+    public static String pagingCountSql(String dbType, String tableName,String tableSchema) {
+        if (StringUtils.isEmpty(dbType) || StringUtils.isEmpty(tableName)) {
+            throw new RuntimeException("sql或者数据库类型不能为空！");
+        }
+        String countSql = "";
+        if (DBTypeEnum.DB_MYSQL.getDbName().equalsIgnoreCase(dbType)||DBTypeEnum.DB_TIDB.getDbName().equals(dbType)) {
+            countSql = "select count(*) as count from " + tableName + " t";
+
+        }else if (DBTypeEnum.DB_ORACLE.getDbName().equalsIgnoreCase(dbType)) {
+            countSql = "select count(*) as count from " + tableName + " t";
+
+        } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equalsIgnoreCase(dbType)) {
+            countSql = "select count(*) as count from " +tableSchema+"."+tableName + " t";
         }
 
-        return count;
+        return countSql;
     }
+
 
     /**
      * @Author: MR LIS
@@ -351,29 +381,23 @@ public class GenDBUtils {
      * @Date: 9:56 2018/5/25
      * @return
      */
-    public static Map<String, String> pagingSql(String dbType, String tableName,String tableSchema, Integer size, Integer start, Integer end) {
+    public static String pagingSql(String dbType, String tableName,String tableSchema, Integer size, Integer start, Integer end) {
         if (StringUtils.isEmpty(dbType) || StringUtils.isEmpty(tableName)) {
             throw new RuntimeException("sql或者数据库类型不能为空！");
         }
-        String countSql = "";
         String querySql = "";
         if (DBTypeEnum.DB_MYSQL.getDbName().equalsIgnoreCase(dbType)||DBTypeEnum.DB_TIDB.getDbName().equals(dbType)) {
-            countSql = "select count(*) as count from " + tableName + " t";
             querySql = "select * from " +tableName+ " limit " + start + "," + size;
 
         }else if (DBTypeEnum.DB_ORACLE.getDbName().equalsIgnoreCase(dbType)) {
-            countSql = "select count(*) as count from " + tableName + " t";
             querySql = "select * from (select T.*,ROWNUM RN from " + tableName + "  T where ROWNUM <= " + end + ") where RN >" + start;
 
         } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equalsIgnoreCase(dbType)) {
-            countSql = "select count(*) as count from " +tableSchema+"."+tableName + " t";
             querySql = "select * from " +tableSchema+"."+tableName+ " limit " + size + " offset  " + start;
 
         }
-        Map<String, String> result = new HashMap<>();
-        result.put(PAGE_COUNT_SQL, countSql);
-        result.put(PAGE_QUERY_SQL, querySql);
-        return result;
+
+        return querySql;
     }
 
     /**

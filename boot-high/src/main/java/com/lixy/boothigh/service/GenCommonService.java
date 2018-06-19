@@ -3,7 +3,6 @@ package com.lixy.boothigh.service;
 
 import com.lixy.boothigh.excep.ServiceException;
 import com.lixy.boothigh.vo.page.ColumnInfoVO;
-import com.lixy.boothigh.vo.page.SandPageViewVO;
 
 import java.util.List;
 
@@ -26,18 +25,18 @@ public interface GenCommonService {
 
     /**
      * @Author: MR LIS
-     * @Description: 根据dbId，tableName执行分页查询，包含总记录数
+     * @Description: 根据dbId，tableName获取总记录数
      * @Date: 14:54 2018/5/25
      * @return
      */
-    SandPageViewVO executePageQuery(Integer dbId, String tableName, int pageNum, int pageSize)throws ServiceException;
+    int executePageTotalCount(Integer dbId, String tableName)throws ServiceException;
     /**
      * @Author: MR LIS
      * @Description: 根据dbId，tableName执行分页查询，不进行总记录数的查询
      * @Date: 14:54 2018/5/25
      * @return
      */
-    List<List<Object>> executePageQueryNotCount(Integer dbId, String tableName, Integer pageNum, Integer pageSize)throws ServiceException;;
+    List<List<Object>> executePageQueryNotCount(Integer dbId, String tableName, Integer pageNum, Integer pageSize)throws ServiceException;
 
     /**
      * @Author: MR LIS

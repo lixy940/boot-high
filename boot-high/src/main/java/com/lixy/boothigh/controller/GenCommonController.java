@@ -71,30 +71,28 @@ public class GenCommonController {
     /**
      * @return
      * @Author: MR LIS
-     * @Description: 获取分页列表信息
+     * @Description: 获取分页列表总记录数
      * @Date: 16:46 2018/5/25
      */
-    @SystemControllerLog(methodDesc = "executePageControllerAop")
-    @ApiOperation(value = "获取分页列表", notes = "获取分页列表信息", consumes = "application/json", response = JsonResult.class)
+    @SystemControllerLog(methodDesc = "executePageTotalCountControllerAop")
+    @ApiOperation(value = "获取分页列表总记录数", notes = "获取分页列表总记录数", consumes = "application/json", response = JsonResult.class)
     @ApiImplicitParams({
             @ApiImplicitParam(paramType = "path", name = "dbId", dataType = "Integer", required = true, value = "数据库id", defaultValue = ""),
-            @ApiImplicitParam(paramType = "path", name = "tableName", dataType = "String", required = true, value = "数据库表名", defaultValue = ""),
-            @ApiImplicitParam(paramType = "path", name = "pageNum", dataType = "Integer", required = true, value = "当前第几页", defaultValue = ""),
-            @ApiImplicitParam(paramType = "path", name = "pageSize", dataType = "Integer", required = true, value = "每页记录数", defaultValue = "")
+            @ApiImplicitParam(paramType = "path", name = "tableName", dataType = "String", required = true, value = "数据库表名", defaultValue = "")
     })
-    @GetMapping("executePage/{dbId}/{tableName}/{pageNum}/{pageSize}")
-    public JsonResult executePage(@PathVariable("dbId") Integer dbId, @PathVariable("tableName") String tableName, @PathVariable("pageNum") Integer pageNum, @PathVariable("pageSize") Integer pageSize) {
+    @GetMapping("executePage/{dbId}/{tableName}")
+    public JsonResult executePageTotalCount(@PathVariable("dbId") Integer dbId, @PathVariable("tableName") String tableName) {
         JsonResult jsonResult = new JsonResult();
         try {
-            SandPageViewVO sandPageViewVO = genCommonService.executePageQuery(dbId, tableName, pageNum, pageSize);
-            jsonResult.setData(sandPageViewVO);
+            int total = genCommonService.executePageTotalCount(dbId, tableName);
+            jsonResult.setData(total);
 
         } catch (ServiceException e) {
-            logger.error("获取分页列表信息异常:{}", e.getMessage());
+            logger.error("获取分页列表总记录数:{}", e.getMessage());
             jsonResult.setState(ResultEnum.SERVER_ERROR.getValue());
-            jsonResult.setMessage("获取分页列表信息异常：" + e.getMessage());
+            jsonResult.setMessage("获取分页列表总记录数：" + e.getMessage());
         } catch (Exception e) {
-            logger.error("获取分页列表信息异常:{}", e.getMessage());
+            logger.error("获取分页列表总记录数:{}", e.getMessage());
             jsonResult.setState(ResultEnum.SERVER_ERROR.getValue());
             jsonResult.setMessage("服务器错误");
         }

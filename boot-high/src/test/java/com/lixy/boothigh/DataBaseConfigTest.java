@@ -3,6 +3,7 @@ package com.lixy.boothigh;
 import com.alibaba.fastjson.JSONObject;
 import com.lixy.boothigh.bean.DataBaseConfig;
 import com.lixy.boothigh.dao.DataBaseConfigMapper;
+import com.lixy.boothigh.service.GenCommonService;
 import com.lixy.boothigh.utils.GenDBUtils;
 import com.lixy.boothigh.vo.SourceDataInfoShowVO;
 import com.lixy.boothigh.vo.page.ColumnInfoVO;
@@ -23,16 +24,17 @@ public class DataBaseConfigTest extends BootHighApplicationTests {
     @Autowired
     private DataBaseConfigMapper configMapper;
 
-
+    @Autowired
+    private GenCommonService  genCommonService;
     @Test
     public void test(){
-        DataBaseConfig dataBaseConfig = configMapper.selectOne(3);
+        DataBaseConfig dtaBaseConfig = configMapper.selectOne(3);
         //表头
-        List<ColumnInfoVO> columnInfoVOList = GenDBUtils.getAllColumnInfo(dataBaseConfig, "USERS");
+        List<ColumnInfoVO> columnInfoVOList = GenDBUtils.getAllColumnInfo(dtaBaseConfig, "USERS");
         System.out.println("columnInfoVOList = " + JSONObject.toJSONString(columnInfoVOList));
         //表分页数据
-        SandPageViewVO sys_categoryinfo = GenDBUtils.executePageQuery(dataBaseConfig, "USERS", 9, 10);
-        System.out.println("sys_categoryinfo = " + JSONObject.toJSONString(sys_categoryinfo));
+        List<List<Object>> listList = genCommonService.executePageQueryNotCount(3, "USERS", 9, 10);
+        System.out.println("result = " + JSONObject.toJSONString(listList));
     }
 
     @Test
