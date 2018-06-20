@@ -18,6 +18,7 @@ import com.lixy.boothigh.interceptor.XbqInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 /**  
@@ -42,9 +43,13 @@ public class MvcInterceptorConfig extends WebMvcConfigurerAdapter{
 		// 拦截/freemarker后路径
 		registry.addInterceptor(new JoeInterceptor()).addPathPatterns("/freemarker/**");
 
-		/*注意对登录拦截的设置，不然无法访问*/
-		registry.addInterceptor(new LoginInterceptor()).addPathPatterns("/**").excludePathPatterns("/hello/beat","/login/loginRegister",
-				"/import/*", "/aop/*","/test/*","swagger-ui.html","/list");
+		//注意对登录拦截的设置，不然无法访问
+		registry.addInterceptor(new LoginInterceptor()).addPathPatterns("/**")
+				.excludePathPatterns("/login/loginRegister", "/import/*", "/aop/*","/test/*","/list","/socktest/*")
+				//后面是swagger拦截排除
+				.excludePathPatterns("/swagger-resources/**")
+                .excludePathPatterns("/v2/api-docs")
+                .excludePathPatterns("/webjars/springfox-swagger-ui/**");
 		super.addInterceptors(registry);
 	}
 
@@ -58,4 +63,11 @@ public class MvcInterceptorConfig extends WebMvcConfigurerAdapter{
         registry.addResourceHandler("/picture/**").addResourceLocations("file:D:/picture/");
         super.addResourceHandlers(registry);
     }
+
+
+	@Override
+	public void addViewControllers(ViewControllerRegistry registry) {
+		registry.addViewController("/").setViewName("/websocketBroadcast");
+	}
+
 }

@@ -4,5 +4,10 @@
 4.MvcInterceptorConfig配置拦截器
 5.SystemLogAspect进行aop的控制
 6.WebConfig对过滤器和监听器的servlet注入
-7.数据库部分sql在本层目录结构
+7.数据库部分在resource/db目录下
 8.swagger进行单元测试，通过访问http://localhost:port/swagger-ui.html
+登录拦截会拦截所有，需要对swagger放行，在MvcInterceptorConfig类
+.excludePathPatterns("/swagger-resources/**")
+.excludePathPatterns("/v2/api-docs")
+.excludePathPatterns("/webjars/springfox-swagger-ui/**");
+9.webSocket长连接使用，主要涉及的类有WebSocketConfig、WebSocketEndPoint、WebSocketController及websocket.jsp

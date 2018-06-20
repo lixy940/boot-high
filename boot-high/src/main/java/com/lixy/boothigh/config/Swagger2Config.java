@@ -36,7 +36,7 @@ public class Swagger2Config {
         return new ApiInfoBuilder().title(" boot-high api docs")
                 .version("1.0.0")
                 .termsOfServiceUrl("www.baidu.com")
-                .license("")
+                .license("MR LIS")
                 .licenseUrl("www.baidu.com")
                 .build();
     }
