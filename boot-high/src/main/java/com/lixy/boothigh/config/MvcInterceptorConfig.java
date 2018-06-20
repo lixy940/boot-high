@@ -44,7 +44,7 @@ public class MvcInterceptorConfig extends WebMvcConfigurerAdapter{
 
 		/*注意对登录拦截的设置，不然无法访问*/
 		registry.addInterceptor(new LoginInterceptor()).addPathPatterns("/**").excludePathPatterns("/hello/beat","/login/loginRegister",
-				"/import/*", "/aop/*","swagger-ui.html","/list");
+				"/import/*", "/aop/*","/test/*","swagger-ui.html","/list");
 		super.addInterceptors(registry);
 	}
 

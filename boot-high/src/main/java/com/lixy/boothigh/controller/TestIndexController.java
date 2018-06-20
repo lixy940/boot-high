@@ -23,7 +23,7 @@ public class TestIndexController {
      * @return
      */
     @SystemControllerLog(methodDesc = "aopIndexControllerAop")
-    @PostMapping("/aopIndex")
+    @GetMapping("/aopIndex")
     public JsonResult aopIndex(String username,String password) {
         JsonResult jsonResult = new JsonResult();
         return jsonResult;

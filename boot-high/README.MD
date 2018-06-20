@@ -4,7 +4,5 @@
 4.MvcInterceptorConfig配置拦截器
 5.SystemLogAspect进行aop的控制
 6.WebConfig对过滤器和监听器的servlet注入
-
-
-
-数据库部分sql在本层目录结构
+7.数据库部分sql在本层目录结构
+8.swagger进行单元测试，通过访问http://localhost:port/swagger-ui.html
