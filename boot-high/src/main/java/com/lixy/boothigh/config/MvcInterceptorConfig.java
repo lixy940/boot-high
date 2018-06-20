@@ -64,10 +64,4 @@ public class MvcInterceptorConfig extends WebMvcConfigurerAdapter{
         super.addResourceHandlers(registry);
     }
 
-
-	@Override
-	public void addViewControllers(ViewControllerRegistry registry) {
-		registry.addViewController("/").setViewName("/websocketBroadcast");
-	}
-
 }
