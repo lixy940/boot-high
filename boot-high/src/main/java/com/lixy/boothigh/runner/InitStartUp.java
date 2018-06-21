@@ -1,18 +1,10 @@
-/**  
- * ---------------------------------------------------------------------------
- * Copyright (c) 2017, xsjt- All Rights Reserved.
- * Project Name:springboot-test  
- * File Name:XbqStartUp.java  
- * Package Name:com.xsjt.runner
- * Author   Joe
- * Date:2017年11月6日下午7:46:48
- * ---------------------------------------------------------------------------  
-*/  
+
   
 package com.lixy.boothigh.runner;
 
 import com.lixy.boothigh.service.RedisService;
 import com.lixy.boothigh.thread.ExcelSynThread;
+import com.lixy.boothigh.thread.MonitorTaskHandlerThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,18 +27,16 @@ public class InitStartUp implements CommandLineRunner {
 	private RedisService redisService;
 	@Autowired
 	private ExcelSynThread excelSynThread;
+    @Autowired
+    private MonitorTaskHandlerThread handlerThread;
 	@Override
 	public void run(String... args){
 		logger.info(this.getClass().getName() + "启动加载数据********");
-/*		try {
-			sysCategoryService.initDataElementToRedis();
-		} catch (ServiceException e) {
-			logger.error("数据元素id->regex初始化完成异常");
-		}*/
-		logger.info("********数据元素id->regex初始化完成********");
 		//启动excel文件服务同步任务
 		new Thread(excelSynThread).start();
 		logger.info("********excel文件服务同步任务启动完成********");
+        new Thread(handlerThread).start();
+        logger.info("********数据同步任务监控启动完成********");
 	}
 }
   

@@ -6,12 +6,13 @@ package com.lixy.boothigh.vo;
  * @date:Create in 14:54 2017/9/13
  */
 public class IdEntityVO extends BaseVO {
-    private String custId;
+    private String userId;
 
-    public String getCustId() {
-        return custId;
+    public String getUserId() {
+        return userId;
     }
-    public void setCustId(String custId) {
-        this.custId = custId;
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 }

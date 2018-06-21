@@ -1,6 +1,7 @@
 package com.lixy.boothigh.service;
 
 import com.lixy.boothigh.excep.ServiceException;
+import com.lixy.boothigh.vo.TaskHandleVO;
 
 import java.util.concurrent.TimeUnit;
 
@@ -139,4 +140,20 @@ public interface RedisService {
      * @throws ServiceException
      */
     Boolean hasKey(String key)throws ServiceException;
+    /**
+     * 设置key,value
+     * @Author: MR LIS
+     * @param key
+     * @param taskVO
+     * @throws Exception
+     */
+    void setRedisKeyToTaskVO(String key, TaskHandleVO taskVO, long expireTime, TimeUnit unit)throws ServiceException;
+
+    /**
+     * 获取
+     * @Author: MR LIS
+     * @param key
+     * @throws Exception
+     */
+    TaskHandleVO getRedisKeyToTaskVO(String key)throws ServiceException;
 }

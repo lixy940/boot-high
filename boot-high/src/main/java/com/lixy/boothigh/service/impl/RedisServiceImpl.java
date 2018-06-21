@@ -2,6 +2,7 @@ package com.lixy.boothigh.service.impl;
 
 import com.lixy.boothigh.excep.ServiceException;
 import com.lixy.boothigh.service.RedisService;
+import com.lixy.boothigh.vo.TaskHandleVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -117,5 +118,15 @@ public class RedisServiceImpl implements RedisService {
     public Boolean hasKey(String key) throws ServiceException {
         return redisTemplate.hasKey(key);
     }
+    @Override
+    public void setRedisKeyToTaskVO(String key, TaskHandleVO taskVO, long expireTime, TimeUnit unit) throws ServiceException {
+        ValueOperations<String, TaskHandleVO> operations = redisTemplate.opsForValue();
+        operations.set(key, taskVO, expireTime, unit);
+    }
 
+    @Override
+    public TaskHandleVO getRedisKeyToTaskVO(String key) throws ServiceException {
+        ValueOperations<String, TaskHandleVO> operations = redisTemplate.opsForValue();
+        return operations.get(key);
+    }
 }
