@@ -12,10 +12,7 @@ import com.lixy.boothigh.vo.page.SandPageViewVO;
 import org.apache.commons.lang3.StringUtils;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Author: MR LIS
@@ -335,7 +332,18 @@ public class GenDBUtils {
             while (rs.next()) {
                 List<Object> objectList = new ArrayList<>();
                 for (int i = 1; i <=rowNum; i++) {
-                    objectList.add(rs.getObject(i));
+                    Object o = rs.getObject(i);
+                    //不为null,且2014-01-01 15:05:29.0格式进行转换
+                    if(!Objects.isNull(o)) {
+                        String s = String.valueOf(o);
+                        //判断是否为2014-01-01 15:05:29.0格式的时间
+                        if(RegexUtils.validateTimestamp(s)){
+                            objectList.add(s.substring(0, s.indexOf(".")));
+                            continue;
+                        }
+
+                    }
+                    objectList.add(o);
                 }
                 listList.add(objectList);
             }

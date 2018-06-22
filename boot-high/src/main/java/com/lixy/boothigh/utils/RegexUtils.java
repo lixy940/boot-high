@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
  */
 public class RegexUtils {
 
+
     private static String MOBILE_REGEX = "^(13[0-9]|15[012356789]|17[3678]|18[0-9]|14[57])[0-9]{8}$";
 
     //验证手机号以1开头，总11位
@@ -34,6 +35,10 @@ public class RegexUtils {
     private static String FLOAT_REGEX = "^[0-9]+([.]{1}[0-9]+){0,1}$";
     //日期格式，2014-01-01或2014-01-01 12:00:00
     private static String DATE_REGEX = "(^[1-9]\\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$)|(^[1-9]\\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])\\s+(20|21|22|23|[0-1]\\d):[0-5]\\d:[0-5]\\d$)";
+    //验证日期后的格式为2014-01-01 15:05:29.0
+    private static String TIMESTAMP_REGEX = "^[1-9]\\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])\\s+(20|21|22|23|[0-1]\\d):[0-5]\\d:[0-5]\\d(\\.\\d)$";
+
+
 
     public static boolean validate(String context,String pattern) {
         Pattern pa = Pattern.compile(pattern);
@@ -143,7 +148,16 @@ public class RegexUtils {
     public static boolean validateDate(String str){
         return validate(str, DATE_REGEX);
     }
+
+    /**
+     * 验证时间日期后的时间格式 2014-01-01 15:05:29.0
+     * @param str
+     * @return
+     */
+    public static boolean validateTimestamp(String str){
+        return validate(str, TIMESTAMP_REGEX);
+    }
     public static void main(String[] args) {
-        System.out.println(RegexUtils.validateIdCard("11111111111111022x"));
+        System.out.println(RegexUtils.validateTimestamp("2014-01-01 15:05:29.0"));
     }
 }
