@@ -49,7 +49,7 @@ public class ExcelSAXParserUtil {
             parser.parse(sheetSource);
             sheet.close();
         }
-
+        pkg.close();
     }
 
     /**
@@ -74,8 +74,8 @@ public class ExcelSAXParserUtil {
             InputSource sheetSource = new InputSource(sheet);
             parser.parse(sheetSource);
             sheet.close();
-            System.out.println("");
         }
+        pkg.close();
     }
 
     /**
