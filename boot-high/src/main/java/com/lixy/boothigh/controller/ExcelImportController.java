@@ -64,7 +64,7 @@ public class ExcelImportController {
     /**
      * @return
      * @Author: MR LIS
-     * @Description:执行数据导入
+     * @Description:执行数据导入，同时存在对象需要传入时
      * @Date: 15:30 2018/4/11
      */
     @SystemControllerLog(methodDesc = "executeImportControllerAop")
