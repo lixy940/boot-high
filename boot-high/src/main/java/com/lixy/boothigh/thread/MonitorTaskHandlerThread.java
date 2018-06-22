@@ -1,5 +1,6 @@
 package com.lixy.boothigh.thread;
 
+import com.lixy.boothigh.bean.SysFilePath;
 import com.lixy.boothigh.constants.BConstant;
 import com.lixy.boothigh.service.RedisService;
 import com.lixy.boothigh.utils.IPUtil;
@@ -68,10 +69,21 @@ public class MonitorTaskHandlerThread implements Runnable{
 
                 //如果es和tidb均完成了同步，发送通知
                 if (taskHandleVO.isEsFlag() && taskHandleVO.isTiFlag()) {
-                    redisService.removeKey(BConstant.TEMPLATE_REDIS_HANDLER_KEY + scanVO.getUploadPathId());
-                    logger.info("发送通知");
-                    //服务器端推送消息到前端
-                    endPoint.sendToUser("task is done！|用户1");
+                    /***
+                     * 登录成功时，将用户登录的userId返回给前端，前端登录后拿到返回的userId，再通过websocket创立连接
+                     */
+                    //推送消息到客户端指定用户，从上次附件的id获取对应的userId
+                    SysFilePath sysFilePath = new SysFilePath()/*filePathService.selectOne(scanVO.getUploadPathId())*/;
+                    boolean flag = endPoint.sendToUser("task is done!|" + sysFilePath.getCreatePersonId());
+                    //如果用户在线，并且通知成功，移除处理任务
+                    if(flag) {
+                        redisService.removeKey(BConstant.TEMPLATE_REDIS_HANDLER_KEY + scanVO.getUploadPathId());
+                    }else{
+                        //不在线，将任务重新放入队列扫描，方便下次通知
+                        opsList.leftPush(BConstant.TEMPLATE_REDIS_TASK_SCAN_KEY, scanVO);
+                        //等待30秒
+                        Thread.sleep(30_000);
+                    }
                     continue;
 
                 }

@@ -90,11 +90,12 @@ public class WebSocketEndPoint {
 
 
     /**
-     * 给指定的人发送消息,
+     * 给指定的人发送消息,并返回是否通知成功
      *
      * @param message
      */
-    public void sendToUser(String message) {
+    public boolean sendToUser(String message) {
+        boolean flag=true;
         String[] sArr = message.split("\\|");
         String toUserNo = sArr[1];
         String sendMessage = sArr[0];
@@ -104,9 +105,13 @@ public class WebSocketEndPoint {
                 webSocketSet.get(toUserNo).sendMessage(now + " 用户【" + userNo + "】发来消息："  + sendMessage);
             } else {
                 logger.info("当前用户userNo={}不在线", toUserNo);
+                flag=false;
             }
         } catch (IOException e) {
+            flag=false;
             e.printStackTrace();
+        }finally {
+            return flag;
         }
     }
 

@@ -45,6 +45,10 @@ public class SysFilePath {
      */
     private Integer status;
     /**
+     * 创建人id
+     */
+    private String createPersonId;
+    /**
      * 创建时间
      */
     private Date createTime;
@@ -131,5 +135,13 @@ public class SysFilePath {
 
     public void setType(Integer type) {
         this.type = type;
+    }
+
+    public String getCreatePersonId() {
+        return createPersonId;
+    }
+
+    public void setCreatePersonId(String createPersonId) {
+        this.createPersonId = createPersonId;
     }
 }
