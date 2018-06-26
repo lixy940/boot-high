@@ -4,6 +4,7 @@ import com.lixy.boothigh.aop.SystemControllerLog;
 import com.lixy.boothigh.enums.ResultEnum;
 import com.lixy.boothigh.excep.ServiceException;
 import com.lixy.boothigh.service.GenCommonService;
+import com.lixy.boothigh.utils.RedisLock;
 import com.lixy.boothigh.vo.page.ColumnInfoVO;
 import com.lixy.boothigh.vo.page.JsonResult;
 import com.lixy.boothigh.vo.page.SandPageViewVO;
@@ -19,11 +20,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @Author: MR LIS
- * @Description:
+ * @Description:根据数据库配置id,表名等获取对应信息，此处需要加入redis分布式锁，防止过多人同时访问，jdbc连接过多，造成系统崩溃
  * @Date: Create in 16:40 2018/5/25
  * @Modified By:
  */
@@ -52,10 +54,17 @@ public class GenCommonController {
     @GetMapping("getAllColumnInfo/{dbId}/{tableName}")
     public JsonResult getAllColumnInfo(@PathVariable("dbId") Integer dbId, @PathVariable("tableName") String tableName) {
         JsonResult jsonResult = new JsonResult();
+        RedisLock lock = new RedisLock("SandCommonController_getAllColumnInfo");
         try {
-            List<ColumnInfoVO> allColumnInfo = genCommonService.getAllColumnInfo(dbId, tableName);
-            jsonResult.setData(allColumnInfo);
-
+            //如果指定时间没有拿到锁就直接返回为空，拿到锁进行查询
+            if (!lock.getLock()) {
+                jsonResult.setData(new ArrayList<>());
+                jsonResult.setState(ResultEnum.SERVER_ERROR.getValue());
+                jsonResult.setMessage("当前查询用户过多，请稍后重试");
+            }else {
+                List<ColumnInfoVO> allColumnInfo = genCommonService.getAllColumnInfo(dbId, tableName);
+                jsonResult.setData(allColumnInfo);
+            }
         } catch (ServiceException e) {
             logger.error("获取表的列信息异常:{}", e.getMessage());
             jsonResult.setState(ResultEnum.SERVER_ERROR.getValue());
@@ -64,6 +73,8 @@ public class GenCommonController {
             logger.error("获取表的列信息异常:{}", e.getMessage());
             jsonResult.setState(ResultEnum.SERVER_ERROR.getValue());
             jsonResult.setMessage("服务器错误");
+        }finally {
+            lock.unlock();
         }
         return jsonResult;
     }
@@ -83,10 +94,18 @@ public class GenCommonController {
     @GetMapping("executePage/{dbId}/{tableName}")
     public JsonResult executePageTotalCount(@PathVariable("dbId") Integer dbId, @PathVariable("tableName") String tableName) {
         JsonResult jsonResult = new JsonResult();
-        try {
-            int total = genCommonService.executePageTotalCount(dbId, tableName);
-            jsonResult.setData(total);
 
+        RedisLock lock = new RedisLock("SandCommonController_executePageTotalCount");
+        try {
+            //如果指定时间没有拿到锁就直接返回为空，拿到锁进行查询
+            if (!lock.getLock()) {
+                jsonResult.setData(0);
+                jsonResult.setState(ResultEnum.SERVER_ERROR.getValue());
+                jsonResult.setMessage("当前查询用户过多，请稍后重试");
+            }else {
+                int total = genCommonService.executePageTotalCount(dbId, tableName);
+                jsonResult.setData(total);
+            }
         } catch (ServiceException e) {
             logger.error("获取分页列表总记录数:{}", e.getMessage());
             jsonResult.setState(ResultEnum.SERVER_ERROR.getValue());
@@ -116,11 +135,17 @@ public class GenCommonController {
     @GetMapping("executePageNotCount/{dbId}/{tableName}/{pageNum}/{pageSize}")
     public JsonResult executePageNotCount(@PathVariable("dbId") Integer dbId, @PathVariable("tableName") String tableName, @PathVariable("pageNum") Integer pageNum, @PathVariable("pageSize") Integer pageSize) {
         JsonResult jsonResult = new JsonResult();
+        RedisLock lock = new RedisLock("SandCommonController_executePageNotCount");
         try {
-
-            List<List<Object>> dataList = genCommonService.executePageQueryNotCount(dbId, tableName, pageNum, pageSize);
-            jsonResult.setData(dataList);
-
+            //如果指定时间没有拿到锁就直接返回为空，拿到锁进行查询
+            if (!lock.getLock()) {
+                jsonResult.setData(new ArrayList<>());
+                jsonResult.setState(ResultEnum.SERVER_ERROR.getValue());
+                jsonResult.setMessage("当前查询用户过多，请稍后重试");
+            }else {
+                List<List<Object>> dataList = genCommonService.executePageQueryNotCount(dbId, tableName, pageNum, pageSize);
+                jsonResult.setData(dataList);
+            }
         } catch (ServiceException e) {
             logger.error("获取分页列表信息异常:{}", e.getMessage());
             jsonResult.setState(ResultEnum.SERVER_ERROR.getValue());

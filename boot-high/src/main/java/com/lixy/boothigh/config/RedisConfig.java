@@ -24,7 +24,7 @@ import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 /**
- * 将 五种数据类型 注入到 Spring容器中
+ * redis注入
  * @author MR LIS
  * @version
  * @since JDK 1.8
@@ -42,6 +42,14 @@ public class RedisConfig {
 		RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
 		initDomainRedisTemplate(redisTemplate, redisConnectionFactory);
 		return redisTemplate;
+	}
+	/**
+	 * 便于SpringContextUtils直接获取,如：(RedisTemplate) SpringContextUtils.getBean("clusterRedisTemplate")
+	 * @return
+	 */
+	@Bean(name = "clusterRedisTemplate")
+	public RedisTemplate<String, Object> clusterRedisTemplate() {
+		return functionDomainRedisTemplate();
 	}
 
 	/**
