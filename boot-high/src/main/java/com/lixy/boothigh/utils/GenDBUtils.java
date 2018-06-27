@@ -195,18 +195,7 @@ public class GenDBUtils {
         } catch (Exception e) {
             e.printStackTrace();
         }finally {
-            try {
-                if(stmt!=null)
-                    stmt.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-            try {
-                if(conn!=null)
-                    conn.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+          closeConn(conn,stmt,rs);
         }
 
         return voList;
