@@ -18,3 +18,5 @@
 <p>3）实际项目中，前端提交一个大的文件上传后，需要后天进行长时间的处理时，前端提交任务后后端采用异步方式进行任务处理，</p>
 <p>处理完成后可通过websocket将消息推送到前端，然后弹框提醒，如：MonitorTaskHandlerThread，</p>
 <p>  endPoint.sendToUser("task is done！|用户1");此处需要用|进行分割消息内容和接收人</p>
+<p>10.增加TimeBeginToEndExecuteCalUtils类对时间的开始和结束进行计算，且保证当前线程下执行的时间计算</p>
+
