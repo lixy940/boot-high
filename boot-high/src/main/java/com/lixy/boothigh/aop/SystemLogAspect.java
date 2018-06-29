@@ -1,6 +1,7 @@
 package com.lixy.boothigh.aop;
 
 import com.alibaba.fastjson.JSONObject;
+import com.lixy.boothigh.utils.TimeBeginToEndExecuteCalUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -73,11 +74,8 @@ public  class SystemLogAspect {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         HttpSession session = request.getSession();
         //读取session中的用户
-/*        LoginUserVO user = (LoginUserVO) session.getAttribute(BConstants.CURRENT_USER_KEY);
-        String custId = "";
-        if (user != null) {
-            custId = "custId:" + user.getCustId();
-        }*/
+/*        LoginUserVO user = (LoginUserVO) session.getAttribute(BConstants.CURRENT_USER_KEY);*/
+        TimeBeginToEndExecuteCalUtils.begin();
         Object res = null;
         try {
             Class<?> aClass = pjp.getTarget().getClass();
@@ -88,7 +86,7 @@ public  class SystemLogAspect {
             //log.info(controllerLog.methodDesc() + " requestParams :" + JSONObject.toJSONString(args));
             res = pjp.proceed();
             logger.info(" ====>"+className+":"+methodDesc+" execute success aopResult:" + JSONObject.toJSONString(res));
-            
+            logger.info("Cost {} mills ====>{}:{} execute success aopResult:{}", TimeBeginToEndExecuteCalUtils.end(),className,methodDesc, JSONObject.toJSONString(res));
         }  catch (Exception e) {
             //记录本地异常日志
             logger.error("aop doControllerAround异常信息:",e);
