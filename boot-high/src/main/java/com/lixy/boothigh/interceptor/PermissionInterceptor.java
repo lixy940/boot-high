@@ -34,7 +34,8 @@ public class PermissionInterceptor extends HandlerInterceptorAdapter {
 			needAdminuser = permission.adminuser();
 		}
 		/**
-		 * 判断是否需要登录或管理员权限，否则跳转到登录uri
+		 * 判断是否需要登录或管理员权限
+		 * 并验证是否登录或者是管理员，否则跳转到登录uri
 		 */
 		if (needLogin) {
 			/*XxlConfUser loginUser = loginService.ifLogin(request);
