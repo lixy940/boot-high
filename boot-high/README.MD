@@ -19,4 +19,6 @@
 <p>处理完成后可通过websocket将消息推送到前端，然后弹框提醒，如：MonitorTaskHandlerThread，</p>
 <p>  endPoint.sendToUser("task is done！|用户1");此处需要用|进行分割消息内容和接收人</p>
 <p>10.增加TimeBeginToEndExecuteCalUtils类对时间的开始和结束进行计算，且保证当前线程下执行的时间计算</p>
-
+<p>11. 增加管理员和超级管理员的注解控制，对某些方法进行注解后，只有是管理员否则超级管理员的才可以访问该方法
+详情如：PermessionLimit和PermissionInterceptor及MvcInterceptorConfig类
+<p/>
