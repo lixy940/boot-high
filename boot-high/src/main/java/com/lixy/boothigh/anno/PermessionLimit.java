@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 /**
  * 权限限制,默认都是false
  *
- * @author xuxueli 2015-12-12 18:29:02
+ * @author MR LIS 2018-7-5 18:29:02
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
