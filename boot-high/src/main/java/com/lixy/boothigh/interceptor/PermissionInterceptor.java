@@ -24,32 +24,25 @@ public class PermissionInterceptor extends HandlerInterceptorAdapter {
 			return super.preHandle(request, response, handler);
 		}
 
-		// if need login
-		boolean needLogin = true;
+		// if need admin
 		boolean needAdminuser = false;
+		boolean superAdminuser = false;
 		HandlerMethod method = (HandlerMethod)handler;
 		PermessionLimit permission = method.getMethodAnnotation(PermessionLimit.class);
 		if (permission!=null) {
-			needLogin = permission.limit();
 			needAdminuser = permission.adminuser();
+			superAdminuser = permission.superAdminUser();
 		}
 		/**
-		 * 判断是否需要登录或管理员权限
-		 * 并验证是否登录或者是管理员，否则跳转到登录uri
+		 * 判断管理员权限及超级管理员权限，如果为true,需要验证用户的权限是否符合要求
 		 */
-		if (needLogin) {
-			/*XxlConfUser loginUser = loginService.ifLogin(request);
-			if (loginUser == null) {
-				response.sendRedirect(request.getContextPath() + "/toLogin");
-				//request.getRequestDispatcher("/toLogin").forward(request, response);
-				return false;
-			}
-			if (needAdminuser && loginUser.getPermission()!=1) {
-				throw new RuntimeException("权限拦截");
-			}
-			request.setAttribute(LoginService.LOGIN_IDENTITY, loginUser);*/
+		if (needAdminuser) {
+			//todo  获取当前用户并判断是否为管理员，如果不是管理员，return false
 		}
 
+		if (superAdminuser) {
+			//todo  获取当前用户并判断是否为超级管理员，否则，return false
+		}
 		return super.preHandle(request, response, handler);
 	}
 

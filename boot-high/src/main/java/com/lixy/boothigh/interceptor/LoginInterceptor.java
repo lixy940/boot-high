@@ -33,12 +33,12 @@ public class LoginInterceptor implements HandlerInterceptor {
          * 此处如果登录验证过不了，sw
          */
         //LoginUserVO vo = (LoginUserVO) request.getSession().getAttribute(BConstant.CURRENT_USER_KEY);
-/*        LoginUserVO vo = new LoginUserVO();
+        LoginUserVO vo = new LoginUserVO();
         if (vo == null || StringUtils.isBlank(vo.getMobile())) {
             response.setHeader("Content-Type", "application/json;charset=utf-8");
             response.getWriter().write("用户未登录,请登录后重试");
             return false;
-        }*/
+        }
         return true;
     }
 }

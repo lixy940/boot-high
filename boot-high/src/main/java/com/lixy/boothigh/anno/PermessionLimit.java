@@ -7,20 +7,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 权限限制
+ * 权限限制,默认都是false
  *
  * @author xuxueli 2015-12-12 18:29:02
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PermessionLimit {
-	
-	/**
-	 * 要求用户登录
-	 *
-	 * @return
-	 */
-	boolean limit() default true;
 
 	/**
 	 * 要求管理员权限
@@ -28,5 +21,12 @@ public @interface PermessionLimit {
 	 * @return
 	 */
 	boolean adminuser() default false;
+
+	/**
+	 * 超级管理员
+	 *
+	 * @return
+	 */
+	boolean superAdminUser() default false;
 
 }

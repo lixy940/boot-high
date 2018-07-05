@@ -14,6 +14,7 @@ package com.lixy.boothigh.config;
 
 import com.lixy.boothigh.interceptor.JoeInterceptor;
 import com.lixy.boothigh.interceptor.LoginInterceptor;
+import com.lixy.boothigh.interceptor.PermissionInterceptor;
 import com.lixy.boothigh.interceptor.XbqInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -45,11 +46,14 @@ public class MvcInterceptorConfig extends WebMvcConfigurerAdapter{
 
 		//注意对登录拦截的设置，不然无法访问
 		registry.addInterceptor(new LoginInterceptor()).addPathPatterns("/**")
-				.excludePathPatterns("/login/loginRegister", "/import/*", "/aop/*","/test/*","/list","/socktest/*")
+				.excludePathPatterns("/login/loginRegister", "/import/*", "/aop/*","/test/*","/list","/socktest/*","/permission/*")
 				//后面是swagger拦截排除
 				.excludePathPatterns("/swagger-resources/**")
                 .excludePathPatterns("/v2/api-docs")
                 .excludePathPatterns("/webjars/springfox-swagger-ui/**");
+		//注册权限拦截器
+		registry.addInterceptor(new PermissionInterceptor()).addPathPatterns("/**");
+
 		super.addInterceptors(registry);
 	}
 

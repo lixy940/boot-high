@@ -3,7 +3,10 @@ package com.lixy.boothigh.controller;
 import com.lixy.boothigh.anno.PermessionLimit;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -13,16 +16,16 @@ import javax.servlet.http.HttpServletRequest;
  * @Date: Create in 17:54 2018/7/4
  * @Modified By:
  */
-@RequestMapping("/import")
+@RequestMapping("/permission")
 @Controller
 public class PermissionAnnoTestController {
 
-    @RequestMapping("/toLogin")
-    @PermessionLimit(limit=false)
-    public String toLogin(Model model, HttpServletRequest request) {
+    @PermessionLimit(superAdminUser=false,adminuser = true)
+    @ResponseBody
+    @GetMapping("/upDb")
+    public String upDb(HttpServletRequest request) {
         /**
-         * 进入该方法需要通过PermissionInterceptor，因为当前跳转到登录页面，如果不需要登录limit=false
-         * 如果需要管理员身份，配置adminuser=true
+         * superAdminUser=false,adminuser = true，表示PermissionInterceptor要验证管理员权限，不严证超级管理员
          */
         return "login";
     }
