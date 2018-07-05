@@ -38,6 +38,12 @@ public class PermissionInterceptor extends HandlerInterceptorAdapter {
 		 */
 		if (needAdminuser) {
 			//todo  获取当前用户并判断是否为管理员，如果不是管理员，return false
+			boolean flag = false/*判断用户是否为管理员逻辑，此处暂时写flag为true*/;
+			if(!flag) {
+				response.setHeader("Content-Type", "application/json;charset=utf-8");
+				response.getWriter().write("权限不够，需要管理员权限");
+				return false;
+			}
 		}
 
 		if (superAdminuser) {
