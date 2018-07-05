@@ -43,6 +43,11 @@ public class LoginController {
         JsonResult jsonResult = new JsonResult();
         try {
 
+            //判断是否在cookie存在，通过cookie中的登录对象和数据库进行比较，如果返回不为空，表示登录状态未失效
+            if (ifLogin(request) != null) {
+                return jsonResult;
+            }
+
             //md5处理输入的密码
             String passwordParamMd5 = DigestUtils.md5DigestAsHex(loginUserVO.getPassword().getBytes());
             //todo 根据用户名获取经过md5处理后存储到db中的密码
@@ -94,5 +99,35 @@ public class LoginController {
         String tokenJson = JSONObject.toJSONString(loginUserVO);
         String tokenHex = new BigInteger(tokenJson.getBytes()).toString(16);
         return tokenHex;
+    }
+    private LoginUserVO parseToken(String tokenHex){
+        LoginUserVO loginUserVO = null;
+        if (tokenHex != null) {
+            String tokenJson = new String(new BigInteger(tokenHex, 16).toByteArray());      // username_password(md5)
+            loginUserVO = JSONObject.parseObject(tokenJson, LoginUserVO.class);
+        }
+        return loginUserVO;
+    }
+    /**
+     * logout
+     *
+     * @param request
+     * @return
+     */
+    public LoginUserVO ifLogin(HttpServletRequest request){
+        String cookieToken = CookieUtil.getValue(request, BConstant.COOKIE_USER_KEY);
+        if (cookieToken != null) {
+            LoginUserVO cookieUser = parseToken(cookieToken);
+            if (cookieUser != null) {
+                //根据用户名查询用户信息
+                LoginUserVO dbUser = null/*userDao.selectUserByName(cookieUser.getUsername())*/;
+                if (dbUser != null) {
+                    if (cookieUser.getPassword().equals(dbUser.getPassword())) {
+                        return cookieUser;
+                    }
+                }
+            }
+        }
+        return null;
     }
 }
