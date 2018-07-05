@@ -56,15 +56,15 @@ public class GenCommonController {
         JsonResult jsonResult = new JsonResult();
         RedisLock lock = new RedisLock("SandCommonController_getAllColumnInfo");
         try {
-            //如果指定时间没有拿到锁就直接返回为空，拿到锁进行查询
+           /* //如果指定时间没有拿到锁就直接返回为空，拿到锁进行查询
             if (!lock.getLock()) {
                 jsonResult.setData(new ArrayList<>());
                 jsonResult.setState(ResultEnum.SERVER_ERROR.getValue());
                 jsonResult.setMessage("当前查询用户过多，请稍后重试");
-            }else {
+            }else {*/
                 List<ColumnInfoVO> allColumnInfo = genCommonService.getAllColumnInfo(dbId, tableName);
                 jsonResult.setData(allColumnInfo);
-            }
+//            }
         } catch (ServiceException e) {
             logger.error("获取表的列信息异常:{}", e.getMessage());
             jsonResult.setState(ResultEnum.SERVER_ERROR.getValue());
@@ -73,9 +73,9 @@ public class GenCommonController {
             logger.error("获取表的列信息异常:{}", e.getMessage());
             jsonResult.setState(ResultEnum.SERVER_ERROR.getValue());
             jsonResult.setMessage("服务器错误");
-        }finally {
+        }/*finally {
             lock.unlock();
-        }
+        }*/
         return jsonResult;
     }
 
@@ -95,17 +95,11 @@ public class GenCommonController {
     public JsonResult executePageTotalCount(@PathVariable("dbId") Integer dbId, @PathVariable("tableName") String tableName) {
         JsonResult jsonResult = new JsonResult();
 
-        RedisLock lock = new RedisLock("SandCommonController_executePageTotalCount");
         try {
-            //如果指定时间没有拿到锁就直接返回为空，拿到锁进行查询
-            if (!lock.getLock()) {
-                jsonResult.setData(0);
-                jsonResult.setState(ResultEnum.SERVER_ERROR.getValue());
-                jsonResult.setMessage("当前查询用户过多，请稍后重试");
-            }else {
-                int total = genCommonService.executePageTotalCount(dbId, tableName);
-                jsonResult.setData(total);
-            }
+
+            int total = genCommonService.executePageTotalCount(dbId, tableName);
+            jsonResult.setData(total);
+
         } catch (ServiceException e) {
             logger.error("获取分页列表总记录数:{}", e.getMessage());
             jsonResult.setState(ResultEnum.SERVER_ERROR.getValue());
@@ -135,17 +129,11 @@ public class GenCommonController {
     @GetMapping("executePageNotCount/{dbId}/{tableName}/{pageNum}/{pageSize}")
     public JsonResult executePageNotCount(@PathVariable("dbId") Integer dbId, @PathVariable("tableName") String tableName, @PathVariable("pageNum") Integer pageNum, @PathVariable("pageSize") Integer pageSize) {
         JsonResult jsonResult = new JsonResult();
-        RedisLock lock = new RedisLock("SandCommonController_executePageNotCount");
         try {
-            //如果指定时间没有拿到锁就直接返回为空，拿到锁进行查询
-            if (!lock.getLock()) {
-                jsonResult.setData(new ArrayList<>());
-                jsonResult.setState(ResultEnum.SERVER_ERROR.getValue());
-                jsonResult.setMessage("当前查询用户过多，请稍后重试");
-            }else {
-                List<List<Object>> dataList = genCommonService.executePageQueryNotCount(dbId, tableName, pageNum, pageSize);
-                jsonResult.setData(dataList);
-            }
+
+            List<List<Object>> dataList = genCommonService.executePageQueryNotCount(dbId, tableName, pageNum, pageSize);
+            jsonResult.setData(dataList);
+
         } catch (ServiceException e) {
             logger.error("获取分页列表信息异常:{}", e.getMessage());
             jsonResult.setState(ResultEnum.SERVER_ERROR.getValue());
