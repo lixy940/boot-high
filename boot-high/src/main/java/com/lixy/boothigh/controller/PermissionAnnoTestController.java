@@ -20,12 +20,12 @@ import javax.servlet.http.HttpServletRequest;
 @Controller
 public class PermissionAnnoTestController {
 
-    @PermessionLimit(superAdminUser=false,adminuser = true)
+    @PermessionLimit(adminuser = true)
     @ResponseBody
     @GetMapping("/upDb")
     public String upDb(HttpServletRequest request) {
         /**
-         * superAdminUser=false,adminuser = true，表示PermissionInterceptor要验证管理员权限，不严证超级管理员
+         * adminuser = true，表示PermissionInterceptor要验证管理员权限，superAdminUser=false为默认，不需要说明
          */
         return "login";
     }
