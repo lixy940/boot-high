@@ -45,7 +45,7 @@ public class MonitorTaskHandlerThread implements Runnable{
                 if (scanVO==null||Objects.isNull(scanVO.getUploadPathId())) {
                     logger.info("MonitorTaskHandlerThread类 队列数据为空，waiting 30 seconds");
                     //等待30秒
-                    Thread.sleep(30_000);
+                    Thread.sleep(60_000);
                     continue;
                 }
 

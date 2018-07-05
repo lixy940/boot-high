@@ -14,6 +14,8 @@ public class BConstant {
     //======================当前用户key===================================================================================
 
     public final static String CURRENT_USER_KEY = "user";
+    //login User cookie key
+    public final static String COOKIE_USER_KEY = "COOKIE_USER_KEY";
 
     //======================当前用户key===================================================================================
 

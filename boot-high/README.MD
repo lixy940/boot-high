@@ -22,3 +22,4 @@
 <p>11. 增加管理员和超级管理员的注解控制，对某些方法进行注解后，只有是管理员否则超级管理员的才可以访问该方法
 详情如：PermessionLimit和PermissionInterceptor及MvcInterceptorConfig类
 <p/>
+<p>12.登录或登出，进行cookie控制，如CookieUtil及LoginController<p/>
