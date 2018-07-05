@@ -51,7 +51,7 @@ public class LoginController {
             //md5处理输入的密码
             String passwordParamMd5 = DigestUtils.md5DigestAsHex(loginUserVO.getPassword().getBytes());
             //todo 根据用户名获取经过md5处理后存储到db中的密码
-            String dbPassword = "";
+            String dbPassword = "db.password";//根据用户名获取经过md5处理后存储到db中的密码
             if (!dbPassword.equals(passwordParamMd5)) {
                 jsonResult.setState(-1);
                 jsonResult.setMessage("账号或密码错误");
