@@ -22,6 +22,7 @@ public class FontImage {
             System.out.println("1.修改需要处理的excel文件名称为‘考试成绩.xlsx’");
             System.out.println("2.请将excel文件‘考试成绩.xlsx’放到 D盘 根目录");
             System.out.println("3.指定excel表中含有姓名列的序号：如第一列输入1，然后回车");
+            System.out.println("4.设置输出的列的宽度，如150 200 250等，然后回车");
             System.out.println("********************************************************************************");
             System.out.println();
             System.out.print("请输入excel表中含有姓名的列序号（数字）===>");
@@ -33,19 +34,40 @@ public class FontImage {
                 column = Integer.parseInt(str);
 
             } catch (Exception e) {
-                System.out.println("=============================================================================");
                 System.out.println();
                 System.out.println("*************输入不正确，请输入数字******************************************");
                 System.out.println();
+                System.out.println("=============================================================================");
+                System.out.println();
+                System.out.println();
+                continue;
+            }
+
+            System.out.println();
+            System.out.print("设置输出每列的宽度（数字），如150 200 250等===>");
+            System.out.println();
+             br = new BufferedReader(new InputStreamReader(System.in));
+             int singleWidth=150;
+            try {
+                String str = br.readLine();
+                singleWidth = Integer.parseInt(str);
+
+            } catch (Exception e) {
+                System.out.println();
+                System.out.println("*************宽度设置不正确，请输入数字******************************************");
+                System.out.println();
+                System.out.println("=============================================================================");
                 System.out.println();
                 System.out.println();
                 continue;
             }
 
             try {
-                handlerExcel(path, column);
-                Thread.sleep(120000);
-                break;
+                handlerExcel(path, column,singleWidth);
+                System.out.println();
+                System.out.println();
+                System.out.println();
+
             } catch (Exception e) {
                 System.out.println("=============================================================================");
                 System.out.println();
@@ -61,7 +83,7 @@ public class FontImage {
     }
 
 
-    public static void handlerExcel(String path,Integer column)throws Exception {
+    public static void handlerExcel(String path,Integer column,Integer singleWidth)throws Exception {
         ExcelSAXParserUtil saxParserUtil = new ExcelSAXParserUtil();
         saxParserUtil.processOneSheet(path);
 
@@ -73,7 +95,6 @@ public class FontImage {
 
         List<String> dataList = saxParserUtil.getDataList();
 
-        int singleWidth = 150;
         int width = dataList.get(0).split(" ").length*singleWidth;
         int height = 64*2;
         Font font = new Font("微软雅黑", Font.PLAIN, 25);
@@ -149,7 +170,6 @@ public class FontImage {
 
         System.out.println("拆分单条数据成功，生成的新文件保存在目录："+outFileDir);
         System.out.println();
-        System.out.println("2分钟后窗口将自动关闭");
         System.out.println("=============================================================================");
 
     }
