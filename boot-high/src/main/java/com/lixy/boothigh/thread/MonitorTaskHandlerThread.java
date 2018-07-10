@@ -10,6 +10,7 @@ import com.lixy.boothigh.websocket.WebSocketEndPoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ import java.util.Objects;
  * @Modified By:
  */
 @Service(value = "monitorTaskHandlerThread")
+@Scope("value = prototype")
 public class MonitorTaskHandlerThread implements Runnable{
     private final static Logger logger = LoggerFactory.getLogger(MonitorTaskHandlerThread.class);
     @Autowired
