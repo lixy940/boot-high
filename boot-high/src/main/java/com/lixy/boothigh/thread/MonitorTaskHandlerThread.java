@@ -24,7 +24,7 @@ import java.util.Objects;
  * @Modified By:
  */
 @Service(value = "monitorTaskHandlerThread")
-@Scope("value = prototype")
+@Scope(value = "prototype")
 public class MonitorTaskHandlerThread implements Runnable {
     private final static Logger logger = LoggerFactory.getLogger(MonitorTaskHandlerThread.class);
     @Autowired

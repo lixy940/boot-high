@@ -37,7 +37,13 @@ public interface GenCommonService {
      * @return
      */
     List<List<Object>> executePageQueryNotCount(Integer dbId, String tableName, Integer pageNum, Integer pageSize)throws ServiceException;
-
+    /**
+     * @Author: MR LIS
+     * @Description: 根据dbId，tableName执行分页查询，不进行总记录数的查询,并返回指定列的数据
+     * @Date: 14:54 2018/7/10
+     * @return
+     */
+    List<List<Object>> executePageQueryColumnRecord(Integer dbId, String tableName,String columnArr, Integer pageNum, Integer pageSize)throws ServiceException;
     /**
      * @Author: MR LIS
      * @Description: 根据库进行制定表的删除

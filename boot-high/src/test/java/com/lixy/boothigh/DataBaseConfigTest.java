@@ -11,6 +11,7 @@ import com.lixy.boothigh.vo.page.SandPageViewVO;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,5 +54,18 @@ public class DataBaseConfigTest extends BootHighApplicationTests {
     public void testDeleteTable(){
         DataBaseConfig dataBaseConfig = configMapper.selectOne(6);
         GenDBUtils.dropTable(dataBaseConfig,"xxx");
+    }
+
+    @Test
+    public void testPageColumn(){
+        List<String> columnList = new ArrayList<>();
+        columnList.add("idcard");
+        columnList.add("username");
+        //获取需要查询的列名，并拼接
+        String columnArr = String.join(",", columnList);
+        DataBaseConfig dtaBaseConfig = configMapper.selectOne(3);
+        String tableName = "USERS";
+        //获取数据结果
+        List<List<Object>> listList = genCommonService.executePageQueryColumnRecord(dtaBaseConfig.getDbId(), tableName, columnArr, 1, Integer.MAX_VALUE);
     }
 }

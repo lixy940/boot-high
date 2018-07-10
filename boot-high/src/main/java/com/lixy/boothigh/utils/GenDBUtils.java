@@ -305,6 +305,16 @@ public class GenDBUtils {
      * @Date: 10:05 2018/5/25
      * @return
      */
+    public static List<List<Object>> executePage(DataBaseConfig dataBaseConfig,String tableName,String columnArrStr,int pageSize, int start, int end){
+
+        return executePageRecord(dataBaseConfig, pagingSql(dataBaseConfig.getDbType(), tableName, dataBaseConfig.getDbTableSchema(),columnArrStr, pageSize, start, end));
+    }
+    /**
+     * @Author: MR LIS
+     * @Description: 查询分页记录结果,不含总记录数
+     * @Date: 10:05 2018/5/25
+     * @return
+     */
     public static List<List<Object>>  executePageRecord(DataBaseConfig dataBaseConfig,String querySql){
         List<List<Object>> listList = new ArrayList<>();
         //查询总记录数
@@ -396,7 +406,30 @@ public class GenDBUtils {
 
         return querySql;
     }
+    /**
+     * @Author: MR LIS
+     * @Description: 分页sql,根据指定的列进行分页查询
+     * @Date: 9:56 2018/5/25
+     * @return
+     */
+    public static String pagingSql(String dbType, String tableName,String tableSchema,String columnArrStr,Integer size, Integer start, Integer end) {
+        if (StringUtils.isEmpty(dbType) || StringUtils.isEmpty(tableName)) {
+            throw new RuntimeException("sql或者数据库类型不能为空！");
+        }
+        String querySql = "";
+        if (DBTypeEnum.DB_MYSQL.getDbName().equalsIgnoreCase(dbType)||DBTypeEnum.DB_TIDB.getDbName().equals(dbType)) {
+            querySql = "select "+columnArrStr+" from " +tableName+ " limit " + start + "," + size;
 
+        }else if (DBTypeEnum.DB_ORACLE.getDbName().equalsIgnoreCase(dbType)) {
+            querySql = "select "+columnArrStr+" from (select T.*,ROWNUM RN from " + tableName + "  T where ROWNUM <= " + end + ") where RN >" + start;
+
+        } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equalsIgnoreCase(dbType)) {
+            querySql = "select "+columnArrStr+" from " +tableSchema+"."+tableName+ " limit " + size + " offset  " + start;
+
+        }
+
+        return querySql;
+    }
     /**
      * mysql与oracle参考对比，参考：https://blog.csdn.net/superit401/article/details/51565119
      */

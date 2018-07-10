@@ -52,10 +52,16 @@ public class GenCommonServiceImpl implements GenCommonService {
     public List<List<Object>> executePageQueryNotCount(Integer dbId, String tableName, Integer pageNum, Integer pageSize) throws ServiceException {
         int start = (pageNum-1)*pageSize;
         int end = pageSize*pageNum;
-        DataBaseConfig sandDataBaseConfig = configMapper.selectOne(dbId);
-        return GenDBUtils.executePage(sandDataBaseConfig, tableName,pageSize, start, end);
+        DataBaseConfig dataBaseConfig = configMapper.selectOne(dbId);
+        return GenDBUtils.executePage(dataBaseConfig, tableName,pageSize, start, end);
     }
-
+    @Override
+    public  List<List<Object>> executePageQueryColumnRecord(Integer dbId, String tableName,String columnArr, Integer pageNum, Integer pageSize) throws ServiceException {
+        int start = (pageNum-1)*pageSize;
+        int end = pageSize*pageNum;
+        DataBaseConfig dataBaseConfig = configMapper.selectOne(dbId);
+        return GenDBUtils.executePage(dataBaseConfig,tableName,columnArr,pageSize, start, end);
+    }
     @Override
     public void dropTable(Integer dbId, String tableName) throws ServiceException {
         DataBaseConfig dataBaseConfig = configMapper.selectOne(dbId);
