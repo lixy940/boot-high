@@ -37,7 +37,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @Modified By:
  */
 @Service(value = "excelSynThread")
-@Scope(value = "prototype")
+/*@Scope(value = "prototype")默认为单例，*/
 public class ExcelSynThread implements Runnable {
 
     private final static Logger logger = LoggerFactory.getLogger(ExcelSynThread.class);
@@ -50,9 +50,9 @@ public class ExcelSynThread implements Runnable {
     //excel列号对应模板字段的字段元素表id
     private Map<Integer, Integer> columnIndexToElementIdMap = new HashMap<>();
     //excel列序号对应的模板属性名
-    private Map<Integer,String> columnIndexToEnameMap = new HashMap<>();
+    private Map<Integer, String> columnIndexToEnameMap = new HashMap<>();
     //从redis中获取对应的元素id对应的正则表达式
-    private  Map<Integer, String> elementIdToRegexMap = new HashMap<>();
+    private Map<Integer, String> elementIdToRegexMap = new HashMap<>();
     //excel列序号对应的模板字段数据类型
     private Map<Integer, String> columnIndexToDataFieldTypeMap = new HashMap<>();
     //定义线程池
@@ -64,11 +64,10 @@ public class ExcelSynThread implements Runnable {
 
     @Override
     public void run() {
-        try {
-            ListOperations<String, TaskScanVO> opsList = redisTemplate.opsForList();
-            elementIdToRegexMap = null/*(Map<Integer, String>) redisService.getValueByKeyMap(RealityRelConstant.DATA_ELEMENT_MAP_KEY)*/;
-            while (true) {
-
+        ListOperations<String, TaskScanVO> opsList = redisTemplate.opsForList();
+        elementIdToRegexMap = null/*(Map<Integer, String>) redisService.getValueByKeyMap(RealityRelConstant.DATA_ELEMENT_MAP_KEY)*/;
+        while (true) {
+            try {
                 lock.lock();
 
                 SysFilePath sysFilePath = null;/*filePathService.getRecordWaitHandlerOne();*/
@@ -87,11 +86,11 @@ public class ExcelSynThread implements Runnable {
                 parserUtil.processOneSheet(sysFilePath.getPath());
                 List<String> dataList = parserUtil.getDataList();
                 //没有数据直接返回，设置任务为已完成
-                if (dataList == null || dataList.isEmpty()){
+                if (dataList == null || dataList.isEmpty()) {
                     taskVO.setEsFlag(true);
                     taskVO.setTiFlag(true);
                     taskVO.setUploadPathId(sysFilePath.getId());
-                    redisService.setRedisKeyToTaskVO(BConstant.TEMPLATE_REDIS_HANDLER_KEY+sysFilePath.getId(),taskVO,BConstant.TEMPLATE_EXPIRE_NUM, TimeUnit.DAYS);
+                    redisService.setRedisKeyToTaskVO(BConstant.TEMPLATE_REDIS_HANDLER_KEY + sysFilePath.getId(), taskVO, BConstant.TEMPLATE_EXPIRE_NUM, TimeUnit.DAYS);
                     opsList.leftPush(BConstant.TEMPLATE_REDIS_TASK_SCAN_KEY, scanVO);
                     continue;
                 }
@@ -106,7 +105,7 @@ public class ExcelSynThread implements Runnable {
 
                 //去除多余不符合条件的数据
                 for (String data : dataList) {
-                    if (validateExcelColumn(data,columnIndexList)) {
+                    if (validateExcelColumn(data, columnIndexList)) {
                         newDataList.add(data);
                     } else {
                         failDataList.add(data);
@@ -126,14 +125,14 @@ public class ExcelSynThread implements Runnable {
                 //数据量不为空
                 if (size > 0) {
                     taskVO.setUploadPathId(sysFilePath.getId());
-                    redisService.setRedisKeyToTaskVO(BConstant.TEMPLATE_REDIS_HANDLER_KEY+sysFilePath.getId(),taskVO,BConstant.TEMPLATE_EXPIRE_NUM, TimeUnit.DAYS);
+                    redisService.setRedisKeyToTaskVO(BConstant.TEMPLATE_REDIS_HANDLER_KEY + sysFilePath.getId(), taskVO, BConstant.TEMPLATE_EXPIRE_NUM, TimeUnit.DAYS);
                     opsList.leftPush(BConstant.TEMPLATE_REDIS_TASK_SCAN_KEY, scanVO);
-                }else{
+                } else {
                     //没有数据，直接返回，这种任务状态为已完成
                     taskVO.setEsFlag(true);
                     taskVO.setTiFlag(true);
                     taskVO.setUploadPathId(sysFilePath.getId());
-                    redisService.setRedisKeyToTaskVO(BConstant.TEMPLATE_REDIS_HANDLER_KEY+sysFilePath.getId(),taskVO,BConstant.TEMPLATE_EXPIRE_NUM, TimeUnit.DAYS);
+                    redisService.setRedisKeyToTaskVO(BConstant.TEMPLATE_REDIS_HANDLER_KEY + sysFilePath.getId(), taskVO, BConstant.TEMPLATE_EXPIRE_NUM, TimeUnit.DAYS);
                     opsList.leftPush(BConstant.TEMPLATE_REDIS_TASK_SCAN_KEY, scanVO);
                     continue;
                 }
@@ -166,22 +165,22 @@ public class ExcelSynThread implements Runnable {
                     if (!datas.isEmpty()) {
 
                         //===========================同步到es,neo4j==============================
-                        logger.info("【数据导入】同步到es和neo4j : 第{}批次放入队列开始！",i+1);
+                        logger.info("【数据导入】同步到es和neo4j : 第{}批次放入队列开始！", i + 1);
                         //subList数据同步到es逻辑，同步完成后会更新任务es同步状态，此处省略
-                        logger.info("【数据导入】同步到es和neo4j : 第{}批次放入队列完成！",i+1);
+                        logger.info("【数据导入】同步到es和neo4j : 第{}批次放入队列完成！", i + 1);
                     }
 
                 }
 
 
                 //===========================同步到tidb==============================
-                int tSize= newDataList.size();
+                int tSize = newDataList.size();
                 int tNum = BConstant.DB_HANDLE_BATCH_NUM; // 每个线程处理的个数
-                int  threadNum = (int)Math.ceil((float)tSize/tNum);
+                int threadNum = (int) Math.ceil((float) tSize / tNum);
                 //这个请求所有的执行完成
                 logger.info("【数据导入】同步到tidb --->导入开始！");
                 List<Future<Integer>> futures = new ArrayList<>();
-                if(!totalDataList.isEmpty()) {
+                if (!totalDataList.isEmpty()) {
                     for (int j = 0; j < threadNum; j++) {
                         DataInsertThread dataInsertThread = (DataInsertThread) SpringContextUtils.getBean("dataInsertThread");
                         List<Map<String, Object>> subDataList = null;
@@ -210,7 +209,7 @@ public class ExcelSynThread implements Runnable {
                 }
 
                 //更新tidb同步状态
-                TaskHandleVO toTaskVO = redisService.getRedisKeyToTaskVO(BConstant.TEMPLATE_REDIS_HANDLER_KEY+sysFilePath.getId());
+                TaskHandleVO toTaskVO = redisService.getRedisKeyToTaskVO(BConstant.TEMPLATE_REDIS_HANDLER_KEY + sysFilePath.getId());
                 toTaskVO.setTiFlag(true);
                 redisService.setRedisKeyToTaskVO(BConstant.TEMPLATE_REDIS_HANDLER_KEY + toTaskVO.getUploadPathId(), toTaskVO, BConstant.TEMPLATE_EXPIRE_NUM, TimeUnit.DAYS);
                 //====================tidb同步完成进行状态更新==========================================
@@ -223,31 +222,29 @@ public class ExcelSynThread implements Runnable {
                 columnIndexToDataFieldTypeMap.clear();
                 totalDataList.clear();
 
-                logger.info("【数据导入】导入耗时{}秒",(System.currentTimeMillis()-l)/1000);
+                logger.info("【数据导入】导入耗时{}秒", (System.currentTimeMillis() - l) / 1000);
 
                 lock.unlock();
-
+            } catch (ServiceException e) {
+                logger.error("ExcelSynThread 处理异常：" + e.getMessage());
+            } catch (InterruptedException e) {
+                logger.error("ExcelSynThread 处理异常：" + e.getMessage());
+            } catch (Exception e) {
+                logger.error("ExcelSynThread 处理异常：" + e.getMessage());
+            } finally {
+                lock.unlock();
+                //清空
+                columnIndexToElementIdMap.clear();
+                columnIndexToEnameMap.clear();
+                columnIndexToDataFieldTypeMap.clear();
+                //关闭线程池
+                closePool();
             }
 
-
-        } catch (ServiceException e) {
-            logger.error("ExcelSynThread 处理异常：" + e.getMessage());
-        } catch (InterruptedException e) {
-            logger.error("ExcelSynThread 处理异常：" + e.getMessage());
-        } catch (Exception e) {
-            logger.error("ExcelSynThread 处理异常：" + e.getMessage());
-        } finally {
-            lock.unlock();
-            //清空
-            columnIndexToElementIdMap.clear();
-            columnIndexToEnameMap.clear();
-            columnIndexToDataFieldTypeMap.clear();
-            //关闭线程池
-            closePool();
         }
+
+
     }
-
-
 
 
     /**
@@ -256,7 +253,7 @@ public class ExcelSynThread implements Runnable {
      * @Description: 单条记录正则校验
      * @Date: 17:02 2018/4/16
      */
-    private boolean validateExcelColumn(String singleRecord,List<Integer> columnIndexList) throws ServiceException {
+    private boolean validateExcelColumn(String singleRecord, List<Integer> columnIndexList) throws ServiceException {
         String[] eColumArr = singleRecord.split(",", -1);
         for (int i = 0; i < eColumArr.length; i++) {
 
@@ -273,15 +270,15 @@ public class ExcelSynThread implements Runnable {
              */
             String regex = elementIdToRegexMap.get(elementId);
             //元素为空，验证字段类型
-            if (elementId == null||StringUtils.isBlank(regex)) {
+            if (elementId == null || StringUtils.isBlank(regex)) {
 
                 String dataType = columnIndexToDataFieldTypeMap.get(i);
                 //根据不同的数据类型进行判断
-                if(!validateDataType(dataType, eColumArr[i])){
+                if (!validateDataType(dataType, eColumArr[i])) {
                     return false;
                 }
 
-            }else{//正则存在
+            } else {//正则存在
 
                 //有一个验证不通过，返回false
                 if (!RegexUtils.validate(eColumArr[i], regex)) {
@@ -296,9 +293,10 @@ public class ExcelSynThread implements Runnable {
 
     /**
      * 验证数据类型
+     *
      * @param dataType
      */
-    private boolean validateDataType(String dataType,String value) {
+    private boolean validateDataType(String dataType, String value) {
 
         //如果数据类型是string,直接返回true
         if (DbDataTypeEnum.STRING.getType().equals(dataType)) {
@@ -312,7 +310,7 @@ public class ExcelSynThread implements Runnable {
         } else if (DbDataTypeEnum.FLOAT.getType().equals(dataType)) {
             return RegexUtils.validateFloat(value);
 
-        }else if (DbDataTypeEnum.DATE.getType().equals(dataType)) {
+        } else if (DbDataTypeEnum.DATE.getType().equals(dataType)) {
             return RegexUtils.validateDate(value);
 
         }
@@ -323,6 +321,7 @@ public class ExcelSynThread implements Runnable {
 
     /**
      * 解析对应数据为为该有的类型
+     *
      * @param columnIndex
      * @param value
      * @return
@@ -336,7 +335,7 @@ public class ExcelSynThread implements Runnable {
         } else if (DbDataTypeEnum.FLOAT.getType().equals(dataType)) {
             return Float.parseFloat(value);
 
-        }else if (DbDataTypeEnum.DATE.getType().equals(dataType)) {
+        } else if (DbDataTypeEnum.DATE.getType().equals(dataType)) {
           /*  String[] arr = value.split(" ");
             if (arr.length == 1) {
                 return DateTimeUtil.parse(value, DateTimeUtil.FORTER_DATE);
@@ -351,7 +350,7 @@ public class ExcelSynThread implements Runnable {
 
 
     //关闭线程池
-    private void closePool(){
+    private void closePool() {
         threadPool.shutdown();  //关闭线程池
     }
 
