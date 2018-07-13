@@ -16,6 +16,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @Author: MR LIS
@@ -41,8 +42,10 @@ public class MonitorTaskHandlerThread implements Runnable {
         while (true) {
             try {
 
-                //两分钟弹出一个数据，如果两分钟内没有数据，等待
+                //不等待，一直获取，没有数据直接返回null
                 scanVO = opsList.rightPop(BConstant.TEMPLATE_REDIS_TASK_SCAN_KEY);
+                //超时时间设置为0,表示对象不存在就一直等待，时间大于零就是在指定时间内没有返回就返回null
+//                scanVO = opsList.rightPop(BConstant.TEMPLATE_REDIS_TASK_SCAN_KEY,0, TimeUnit.SECONDS);
 //                logger.info("MonitorTaskHandlerThread类 uploadPathId=[{}]",uploadPathId);
                 //扫描对象为空或上传文件id为空，进行等待
                 if (scanVO == null || Objects.isNull(scanVO.getUploadPathId())) {
