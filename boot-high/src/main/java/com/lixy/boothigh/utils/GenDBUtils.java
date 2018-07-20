@@ -204,7 +204,7 @@ public class GenDBUtils {
     /**
      * 连接数量最大值
      */
-    private static volatile AtomicInteger activeSize = new AtomicInteger(15);
+    private static volatile AtomicInteger activeSize = new AtomicInteger(20);
 
     /**
      * 记录连接被创建个数
