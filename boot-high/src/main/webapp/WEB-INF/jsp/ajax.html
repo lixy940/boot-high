@@ -1,0 +1,274 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <script src="./js/jquery.min.js"></script>
+    <title>数据源导入工具</title>
+</head>
+<body onload="loadDb()">
+<div align="center" style="font-size: 30px;">
+    数据源导入工具
+</div>
+<h3>选择数据库连接</h3>
+<HR>
+<div style="height:130px">
+    选择数据连接：<select id="dbSelect" style="width: auto;"></select>&emsp;<button id="createNewDb">创建连接</button>
+    </br>
+    <div hidden id="newDbInfo">
+        <fieldset>
+            <legend>创建连接</legend>
+            数据库名称：<input type="text" value="" id="dbName">&nbsp;
+            数据库类型：<select id="dbType">
+            <option value="mysql">mysql</option>
+            <option value="oracle">oracle</option>
+            <option value="postgresql">postgresql</option>
+            <option value="tidb">tidb</option>
+        </select>&nbsp;
+            ip：<input type="text" value="" id="ip"/>&nbsp;
+            端口号：<input type="text" value="" id="port"/>&nbsp;
+            库名：<input type="text" value="" id="serverName"/>&nbsp;
+            模式：<input type="text" value="" id="dbSchemaName" placeholder="postgrep数据库才填写"/>&nbsp;</br>
+            <HR>
+            数据库用户名：<input type="text" value="" id="username"/>&nbsp;
+            数据库密码：<input type="text" value="" id="password"/>&nbsp;
+            <input type="submit" id="doSave" value="保存">
+        </fieldset>
+    </div>
+</div>
+<h3>选择目标表</h3>
+<HR>
+<div style="height:700px">
+    表名：<input id="tableName" type="text" value="" placeholder="输入模糊匹配的表名"/>
+    <input type="submit" id="search" value="查询"/>
+    <hr>
+    <table border="1" id="tableLabel">
+
+    </table>
+    <hr>
+    <h3><label id="preTableName"></label>表详情预览</h3>
+    <table border="1" id="detailLabel" bgcolor="#f0ffff" align="center">
+
+    </table>
+</div>
+<h3>绑定</h3>
+<HR>
+<div style="height:200px"></div>
+</body>
+<script type="text/javascript">
+
+    /*
+    * 装载数据库连接
+    * */
+    function loadDb() {
+
+        $.ajax({
+            type: "post",
+            url: "http://localhost:8081/category/getSysDbInfoList",
+            cache: false,
+            success: function (output) {
+                if (output == "" || output == undefined) {
+                    alert('返回值为空!');
+                }
+                var dbSelect = $("#dbSelect");
+                dbSelect.append("<option value=\"\">请选择</option>");
+                for (var i = 0; i < output.length; i++) {
+                    dbSelect.append("<option value='" + output[i]["dbinfoId"] + "'>" + output[i]["dbName"] + "</option>");
+                }
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert("获取数据异常");
+            }
+        });
+
+    }
+
+
+    $(function () {
+        /*
+        * 创建新连接
+        * */
+        $("#createNewDb").click(function () {
+            $("#newDbInfo").show();
+            // $(this).attr("disabled",true);
+        })
+
+        /**
+         * 保存连接
+         */
+        $("#doSave").click(function () {
+            var dbName = $("#dbName").val();
+            var dbType = $("#dbType").val();
+            var ip = $("#ip").val();
+            var port = $("#port").val();
+            var serverName = $("#serverName").val();
+            var dbSchemaName = $("#dbSchemaName").val();
+            var username = $("#username").val();
+            var password = $("#password").val();
+            var dbInfo = {
+                dbName: dbName,
+                dbType: dbType,
+                dbIp: ip,
+                dbPort: port,
+                dbServerName: serverName,
+                dbTableSchema: dbSchemaName,
+                dbUser: username,
+                dbPassword: password
+            }
+            $.ajax({
+                type: "post",
+                url: "http://localhost:8081/category/saveDbInfo",
+                data: dbInfo,
+                dataType: 'json',
+                cache: false,
+                success: function (output) {
+
+                    if (output == 1) {
+                        //保存成功
+                        // $("#doSave").attr("disabled",true);
+                        //重新装载连接
+                        $("#dbSelect").html("");
+                        loadDb();
+                        $("#dbName").val("");
+                        $("#dbType").val("mysql");
+                        $("#ip").val("");
+                        $("#port").val("");
+                        $("#serverName").val("");
+                        $("#dbSchemaName").val("");
+                        $("#username").val("");
+                        $("#password").val("");
+                        alert("保存成功");
+                    } else {
+                        alert("保存失败");
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert("保存数据异常");
+                }
+            });
+        });
+
+        /**
+         * 监听选中的数据库，根据数据库id获取所有的数据库表
+         */
+        $("#dbSelect").change(function () {
+            // $("#tableLabel").html("");
+            var dbId = $(this).val();
+            if (dbId != '' && dbId != undefined) {
+                $("#search").attr("disabled", false);
+                getTableS(dbId, 1, 10);
+            }else{
+                $("#search").attr("disabled", true);
+            }
+        });
+
+
+        $("#search").click(function () {
+            var tableName = $("#tableName").val();
+            var dbId = $("#dbSelect").val();
+            getTableS(dbId, 1, 10, tableName);
+        })
+
+    })
+
+
+    /**
+     * 分页查询
+     * @param dbId
+     * @param pageNo
+     * @param pageSize
+     * @param tableName
+     */
+    function getTableS(dbId, pageNo, pageSize, tableName) {
+        $("#tableLabel").html("");
+        if (pageNo == undefined) {
+            pageNo = 1;
+        }
+        if (pageSize == undefined) {
+            pageSize = 10;
+        }
+
+        var url = "dbId=" + dbId + "&pageNo=" + pageNo + "&pageSize=" + pageSize;
+        if (tableName != 'undefined' && tableName != undefined && tableName != '') {
+            url = url + "&tableName=" + tableName;
+        }
+
+        $.ajax({
+            type: "post",
+            url: "http://localhost:8081/category/getAllTablesByDbId?" + url,
+            dataType: 'json',
+            cache: false,
+            success: function (output) {
+                if (output == "" || output == undefined) {
+                    alert('返回值为空!');
+                } else {
+                    console.log(output);
+                    var totalNum = output["total"];
+                    var totalPage = output["totalPage"];
+                    var result = output["dataList"];
+                    var tableLabel = $("#tableLabel");
+                    tableLabel.append("<tr align='center'><td>表名</td><td>中文名</td><td>操作</td></tr>")
+                    for (var i = 0; i < result.length; i++) {
+                        var str = "<tr align='center'><td>" + result[i]["tableEname"] + "</td><td>" + result[i]["tableCname"] + "</td><td><a href='#' onclick='selectTable(\"" + result[i]["tableEname"] + "\",\"" + dbId + "\")'>选择</a></td></tr>";
+                        tableLabel.append(str);
+                    }
+
+                    var prePage = pageNo - 1 <= 0 ? pageNo : pageNo - 1;
+                    var nextPage = pageNo + 1 > totalPage ? totalPage : pageNo + 1;
+                    var foot = "<tr align='center'><td colspan=\"3\">当前第" + pageNo + "页&nbsp;&nbsp;共" + totalPage + "页&nbsp;<a href='#' onclick='getTableS(" + dbId + "," + prePage + "," + pageSize + ",\"" + tableName + "\")'>上一页</a>&nbsp;<a href='#' onclick='getTableS(" + dbId + "," + nextPage + "," + pageSize + ",\"" + tableName + "\")'>下一页</a></td></tr>";
+                    tableLabel.append(foot);
+                }
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert("获取数据数据异常");
+            }
+        });
+    }
+
+
+    /**
+     * 选择表
+     */
+    function selectTable(tableName, dbId) {
+        $("#detailLabel").html("");
+        $("#preTableName").html("");
+        $.ajax({
+            type: "post",
+            url: "http://localhost:8081/category/getColumnListBy?tableName=" + tableName + "&dbId=" + dbId,
+            dataType: 'json',
+            cache: false,
+            success: function (output) {
+                if (output == "" || output == undefined) {
+                    alert('返回值为空!');
+                } else {
+                    // console.log(output);
+                    $("#preTableName").html(tableName);
+                    var header = output["columnList"]
+                    var detailLabel = $("#detailLabel");
+                    var str = "<tr align='center'>";
+                    for (var i = 0; i < header.length; i++) {
+                        str +="<td>"+header[i]+"</td>"
+                    }
+                    str += "</tr>"
+                    detailLabel.append(str);
+                    var dataList = output["dataList"]
+                    for(var j=0;j<dataList.length;j++) {
+                        var d = dataList[j];
+                        var colStr = "<tr align='center'>";
+                        for(var m=0;m<d.length;m++) {
+                            colStr +="<td>"+d[m]+"</td>"
+                        }
+                        colStr += "</tr>";
+                        detailLabel.append(colStr);
+                    }
+
+                }
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert("获取数据数据异常");
+            }
+        });
+
+    }
+
+
+</script>
+</html>
