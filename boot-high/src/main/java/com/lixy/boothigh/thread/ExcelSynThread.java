@@ -5,10 +5,7 @@ import com.lixy.boothigh.constants.BConstant;
 import com.lixy.boothigh.enums.DbDataTypeEnum;
 import com.lixy.boothigh.excep.ServiceException;
 import com.lixy.boothigh.service.RedisService;
-import com.lixy.boothigh.utils.ExcelSAXParserUtil;
-import com.lixy.boothigh.utils.IPUtil;
-import com.lixy.boothigh.utils.RegexUtils;
-import com.lixy.boothigh.utils.SpringContextUtils;
+import com.lixy.boothigh.utils.*;
 import com.lixy.boothigh.vo.TaskHandleVO;
 import com.lixy.boothigh.vo.TaskScanVO;
 import org.apache.commons.lang3.StringUtils;
@@ -76,6 +73,16 @@ public class ExcelSynThread implements Runnable {
                     Thread.sleep(60_000);
                     continue;
                 }
+
+                /**
+                 * 从ftp下载文件到本地
+                 */
+                String path = sysFilePath.getPath();
+                String fileName = path.substring(path.lastIndexOf("\\")+1, path.length());
+                FtpAtt ftpAtt = FtpAtt.getDefaultConfig();
+                FtpUtil.connectFtp(ftpAtt);
+                FtpUtil.downLoad(ftpAtt,BConstant.EXCEL_UPLOAD_DIR,BConstant.FTP_DIR,fileName);
+                FtpUtil.closeFtp();
 
                 //定义任务
                 TaskHandleVO taskVO = new TaskHandleVO(sysFilePath.getId());
