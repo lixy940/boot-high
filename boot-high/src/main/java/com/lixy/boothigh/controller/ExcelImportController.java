@@ -103,10 +103,7 @@ public class ExcelImportController {
                 file.transferTo(savedFile);  //转存文件
             }*/
             //存储文件到ftp上
-            FtpAtt ftpAtt = FtpAtt.getDefaultConfig();
-            FtpUtil.connectFtp(ftpAtt);
-            FtpUtil.upload(file.getInputStream(),savedFileName);
-            FtpUtil.closeFtp();
+            FtpUtil.upload(FtpAtt.getDefaultConfig(),file.getInputStream(),savedFileName);
 
         } catch (ServiceException e) {
             jsonResult.setState(1);
