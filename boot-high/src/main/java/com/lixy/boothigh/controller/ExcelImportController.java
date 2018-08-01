@@ -1,9 +1,10 @@
 package com.lixy.boothigh.controller;
 
-import com.alibaba.fastjson.JSONObject;
 import com.lixy.boothigh.aop.SystemControllerLog;
 import com.lixy.boothigh.constants.BConstant;
 import com.lixy.boothigh.excep.ServiceException;
+import com.lixy.boothigh.utils.FtpAtt;
+import com.lixy.boothigh.utils.FtpUtil;
 import com.lixy.boothigh.vo.page.JsonResult;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -91,25 +92,30 @@ public class ExcelImportController {
             UUID FileId = UUID.randomUUID();                        //生成文件的前缀包含连字符
             String savedFileName = FileId.toString().replace("-", "").concat(fileSuffix);       //文件存取名
 //            String savedDir = request.getSession().getServletContext().getRealPath("fileDir"); //获取服务器指定文件存取路径
-            String savedDir = BConstant.EXCEL_UPLOAD_DIR; //设置路径
-            File dir = new File(savedDir);
+            //存储到本地
+           /*  String savedDir = BConstant.EXCEL_UPLOAD_DIR; //设置路径
+           File dir = new File(savedDir);
             if (!dir.exists())
                 dir.mkdirs();
             File savedFile = new File(savedDir, savedFileName);
             boolean isCreateSuccess = savedFile.createNewFile();
             if (isCreateSuccess) {
                 file.transferTo(savedFile);  //转存文件
-            }
-
+            }*/
+            //存储文件到ftp上
+            FtpAtt ftpAtt = FtpAtt.getDefaultConfig();
+            FtpUtil.connectFtp(ftpAtt);
+            FtpUtil.upload(file.getInputStream(),savedFileName);
+            FtpUtil.closeFtp();
 
         } catch (ServiceException e) {
             jsonResult.setState(1);
             jsonResult.setMessage(e.getMessageTip());
-            logger.error("executeImport 异常：{}", e.getMessage());
+            logger.error("executeImport 异常：{}", e.getMessage(),e);
         } catch (Exception e) {
             jsonResult.setState(1);
             jsonResult.setMessage(e.getMessage());
-            logger.error("executeImport 异常：{}", e.getMessage());
+            logger.error("executeImport 异常：{}", e.getMessage(),e);
         }
 
         return jsonResult;

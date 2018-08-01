@@ -63,4 +63,26 @@ public class BConstant {
      * 同步excel一个批次处理的记录数
      */
     public static final int DB_HANDLE_BATCH_NUM=10000;
+
+
+    /**
+     * FTP 登录用户名
+     */
+    public final static String FTP_USERNAME = PropertyReaderUtils.getProValue("ftp.username");
+    /**
+     * FTP 登录密码
+     */
+    public final static String FTP_PASSWORD = PropertyReaderUtils.getProValue("ftp.password");
+    /**
+     * FTP 服务器地址IP地址
+     */
+    public final static String FTP_IP = PropertyReaderUtils.getProValue("ftp.ip");
+    /**
+     * FTP 端口
+     */
+    public final static int FTP_PORT = Integer.parseInt(PropertyReaderUtils.getProValue("ftp.port"));
+    /**
+     * FTP指定目录
+     */
+    public final static String FTP_DIR = PropertyReaderUtils.getProValue("ftp.dir");
 }

@@ -43,15 +43,12 @@ public class MonitorTaskHandlerThread implements Runnable {
             try {
 
                 //不等待，一直获取，没有数据直接返回null
-                scanVO = opsList.rightPop(BConstant.TEMPLATE_REDIS_TASK_SCAN_KEY);
+                scanVO = opsList.rightPop(BConstant.TEMPLATE_REDIS_TASK_SCAN_KEY,10,TimeUnit.SECONDS);
                 //超时时间设置为0,表示对象不存在就一直等待，时间大于零就是在指定时间内没有返回就返回null
 //                scanVO = opsList.rightPop(BConstant.TEMPLATE_REDIS_TASK_SCAN_KEY,0, TimeUnit.SECONDS);
 //                logger.info("MonitorTaskHandlerThread类 uploadPathId=[{}]",uploadPathId);
                 //扫描对象为空或上传文件id为空，进行等待
                 if (scanVO == null || Objects.isNull(scanVO.getUploadPathId())) {
-                    logger.info("MonitorTaskHandlerThread类 队列数据为空，waiting 30 seconds");
-                    //等待30秒
-                    Thread.sleep(60_000);
                     continue;
                 }
 
@@ -59,8 +56,6 @@ public class MonitorTaskHandlerThread implements Runnable {
                 if (!scanVO.getIp().equals(IPUtil.getLocalIP())) {
                     logger.info("MonitorTaskHandlerThread类 ip地址非本机，waiting 30 seconds");
                     opsList.leftPush(BConstant.TEMPLATE_REDIS_TASK_SCAN_KEY, scanVO);
-                    //等待30秒
-                    Thread.sleep(30_000);
                     continue;
                 }
 
@@ -95,7 +90,6 @@ public class MonitorTaskHandlerThread implements Runnable {
 
                 //未完成同步时将扫描任务重新放入队列
                 opsList.leftPush(BConstant.TEMPLATE_REDIS_TASK_SCAN_KEY, scanVO);
-                Thread.sleep(10_000);
             } catch (Exception e) {
                 e.printStackTrace();
                 logger.error("任务处理异常：", e.getMessage());
