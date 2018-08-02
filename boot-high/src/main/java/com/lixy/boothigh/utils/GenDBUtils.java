@@ -118,17 +118,25 @@ public class GenDBUtils {
     /**
      * postgres库对应库对应的所有表sql，postgres后面跟模式名称，连接时已经确定了是哪个库
      */
-    private static String TABLE_POSTGRES_PREFIX = "SELECT t.tablename as table_name,d.description as table_comment,c.reltuples as row_num FROM pg_tables t \n" +
-            "JOIN pg_class c ON t.tablename=c.relname\n" +
-            "left JOIN pg_description d ON c.oid = d.objoid  \n" +
-            "AND d.objsubid = '0' \n" +
-            "where t.schemaname= ";
+    private static String TABLE_POSTGRES_PREFIX = "SELECT\n" +
+            "r.relname AS table_name,\n" +
+            "cast(obj_description(relfilenode,'pg_class') as varchar) as table_comment ,\n" +
+            "r.reltuples AS row_num\n" +
+            "FROM pg_class r\n" +
+            "JOIN pg_namespace n ON r.relnamespace = n.oid\n" +
+            "WHERE\n" +
+            "r.relkind = 'r'\n" +
+            "AND n.nspname = ";
     /**
      * postgres库对应库对应的所有表记录数求和
      */
-    private static String ROW_COUNT_POSTGRES_PREFIX = "SELECT SUM(c.reltuples) as total_count FROM pg_tables t \n" +
-            "JOIN pg_class c ON t.tablename=c.relname\n" +
-            "where t.schemaname= ";
+    private static String ROW_COUNT_POSTGRES_PREFIX = "SELECT\n" +
+            "SUM(r.reltuples) as total_count\n" +
+            "FROM pg_class r\n" +
+            "JOIN pg_namespace n ON r.relnamespace = n.oid\n" +
+            "WHERE\n" +
+            "r.relkind = 'r'\n" +
+            "AND n.nspname = ";
 
     /**
      * postgres库对应库对应的所有表个数
