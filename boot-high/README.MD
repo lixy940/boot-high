@@ -23,3 +23,4 @@
 详情如：PermessionLimit和PermissionInterceptor及MvcInterceptorConfig类
 <p/>
 <p>12.登录或登出，进行cookie控制，如CookieUtil及LoginController<p/>
+<p>13.增加ftp逻辑，FtpUtil类和ExcelImportController类可参看调用<p/>
