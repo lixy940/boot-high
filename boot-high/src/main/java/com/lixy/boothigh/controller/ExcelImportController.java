@@ -104,6 +104,8 @@ public class ExcelImportController {
             }*/
             //存储文件到ftp上
             FtpUtil.upload(FtpAtt.getDefaultConfig(),file.getInputStream(),savedFileName);
+            //下载本地指定目录
+            FtpUtil.downLoad(FtpAtt.getDefaultConfig(),BConstant.EXCEL_UPLOAD_DIR,BConstant.FTP_DIR,savedFileName);
 
         } catch (ServiceException e) {
             jsonResult.setState(1);

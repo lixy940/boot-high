@@ -6,6 +6,7 @@ package com.lixy.boothigh.utils;
  * @Modified By:
  */
 
+import com.lixy.boothigh.utils.FtpAtt;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
@@ -286,12 +287,12 @@ public class FtpUtil {
         f.setUserName("ftpserver");
         f.setPwd("ftp@123456");
         f.setPath("excelDir");
-        FtpUtil.connectFtp(f);
+//        FtpUtil.connectFtp(f);
 /*        File file = new File("D:\\fileDir\\excel\\81_syscategoryinfo.xlsx");
         FtpUtil.upload(new FileInputStream(file),"hhhh2.xlsx");*/
 //        FtpUtil.upload(file);//把文件上传在ftp上
 //        FtpUtil.downLoad(f, "e:/",  "excelDir");//下载ftp文件测试
-        FtpUtil.downLoad(f, "e:/", "excelDir", "hhhh.xlsx");//下载ftp文件测试
+        FtpUtil.downLoad(f, "e:/", "/excelDir", "521dcb681d954526bb1aed1dd187f2bf.xlsx");//下载ftp文件测试
         System.out.println("ok");
 
     }
