@@ -14,8 +14,8 @@ import redis.clients.jedis.JedisPoolConfig;
 import java.util.Arrays;
 
 /**
+ * @Description:redis配置信息
  * @Author: MR LIS
- * @Description:
  * @Date: Create in 16:33 2018/8/14
  * @Modified By:
  */
