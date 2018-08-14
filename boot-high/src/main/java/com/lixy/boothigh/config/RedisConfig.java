@@ -1,79 +1,82 @@
-/**  
- * ---------------------------------------------------------------------------
- * Copyright (c) 2017, lixy- All Rights Reserved.
- * Project Name:spring-boot-learn  
- * File Name:RedisConfig.java  
- * Package Name:com.lixy.redis
- * Author   Joe
- * Date:2017年11月14日下午3:39:34
- * ---------------------------------------------------------------------------  
-*/
-
 package com.lixy.boothigh.config;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisClusterConfiguration;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import redis.clients.jedis.JedisPoolConfig;
+
+import java.util.Arrays;
 
 /**
- * redis注入
- * @author MR LIS
- * @version
- * @since JDK 1.8
- * 参考地址：https://www.cnblogs.com/skyessay/p/6485187.html
+ * @Author: MR LIS
+ * @Description:
+ * @Date: Create in 16:33 2018/8/14
+ * @Modified By:
  */
 @Configuration
 public class RedisConfig {
-	
-	// 注入 RedisConnectionFactory
-	@Autowired
-	private RedisConnectionFactory redisConnectionFactory;
-    /*@Bean(name = "redisTemplate")*/
-	@Bean
-	public RedisTemplate<String, Object> functionDomainRedisTemplate() {
-		RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
-		initDomainRedisTemplate(redisTemplate, redisConnectionFactory);
-		return redisTemplate;
-	}
-	/**
-	 * 便于SpringContextUtils直接获取,如：(RedisTemplate) SpringContextUtils.getBean("clusterRedisTemplate")
-	 * @return
-	 */
-	@Bean(name = "clusterRedisTemplate")
-	public RedisTemplate<String, Object> clusterRedisTemplate() {
-		return functionDomainRedisTemplate();
-	}
 
-	/**
-	 * 设置数据存入 redis 的序列化方式
-	 * @param redisTemplate
-	 * @param factory
-	 */
-	private void initDomainRedisTemplate(RedisTemplate<String, Object> redisTemplate, RedisConnectionFactory factory) {
-		redisTemplate.setKeySerializer(new StringRedisSerializer());
-		redisTemplate.setHashKeySerializer(new StringRedisSerializer());
-		redisTemplate.setHashValueSerializer(new JdkSerializationRedisSerializer());
-//		redisTemplate.setValueSerializer(new JdkSerializationRedisSerializer());
-		redisTemplate.setConnectionFactory(factory);
-        // 开启事务支持
-        redisTemplate.setEnableTransactionSupport(true);
-        // 使用json格式序列化缓存值
-        Jackson2JsonRedisSerializer jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer(Object.class);
-        ObjectMapper om = new ObjectMapper();
-        om.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-        om.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
-        jackson2JsonRedisSerializer.setObjectMapper(om);
-        redisTemplate.setValueSerializer(jackson2JsonRedisSerializer);
-        redisTemplate.setDefaultSerializer(jackson2JsonRedisSerializer);
-        redisTemplate.afterPropertiesSet();
-	}
+    @Value("${spring.redis.host}")
+    private String host;
+    @Value("${spring.redis.timeout}")
+    private int timeout;
+
+    @Value("${spring.redis.pool.max-active}")
+    private int maxActive;
+    @Value("${spring.redis.pool.max-wait}")
+    private int maxWait;
+    @Value("${spring.redis.pool.max-idle}")
+    private int maxIdle;
+    @Value("${spring.redis.pool.min-idle}")
+    private int minIdle;
+
+
+    /**
+     * 选择工厂
+     * @param
+     * @return
+     */
+    @Bean
+    public JedisConnectionFactory jedisConnectionFactory() {
+        String[] hosts = StringUtils.split(host, ",");
+        JedisConnectionFactory factory;
+        if (hosts.length == 1) {
+            String hostAndPort = hosts[0];
+            String[] split = hostAndPort.split(":");
+            factory = new JedisConnectionFactory();
+            factory.setHostName(split[0]);
+            factory.setPort(Integer.valueOf(split[1]));
+        } else {
+            RedisClusterConfiguration redisClusterConfiguration = new RedisClusterConfiguration(Arrays.asList(hosts));
+            redisClusterConfiguration.setMaxRedirects(5);
+            factory = new JedisConnectionFactory(redisClusterConfiguration);
+        }
+        factory.setTimeout(timeout);
+        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+        jedisPoolConfig.setTestOnBorrow(true);
+        jedisPoolConfig.setTestWhileIdle(true);
+        jedisPoolConfig.setTimeBetweenEvictionRunsMillis(30000);
+        jedisPoolConfig.setMinIdle(minIdle);
+        jedisPoolConfig.setMaxIdle(maxIdle);
+        jedisPoolConfig.setMaxWaitMillis(maxWait);
+        jedisPoolConfig.setMaxTotal(maxActive);
+        factory.setPoolConfig(jedisPoolConfig);
+        return factory;
+    }
+
+    @Bean
+    public RedisTemplate<String, ?> redisTemplate() {
+        RedisTemplate<String, ?> template = new RedisTemplate<>();
+        template.setConnectionFactory(jedisConnectionFactory());
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new RedisObjectSerializer());
+        return template;
+    }
 
 }
