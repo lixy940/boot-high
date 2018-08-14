@@ -6,7 +6,6 @@ package com.lixy.boothigh.utils;
  * @Modified By:
  */
 
-import com.lixy.boothigh.utils.FtpAtt;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
