@@ -104,7 +104,7 @@ public class FtpUtil {
     }
 
     /**
-     * 根据流上传文件到ftp,名称为remoteFileName
+     * 根据流上传文件到ftp,名称为remoteFileName，相同文件重复上传进行覆盖替换
      *
      * @param input          流
      * @param remoteFileName 保存在ftp的文件名
@@ -112,12 +112,17 @@ public class FtpUtil {
      * @Author: MR LIS
      * @Date: 15:43 2018/8/1
      */
-    public static void upload(FtpAtt ftpAtt,InputStream input, String remoteFileName) {
+    public static void upload(FtpAtt ftpAtt, InputStream input, String remoteFileName) {
 
         try {
-            if(connectFtp(ftpAtt)) {
+            if (connectFtp(ftpAtt)) {
+                //判断目录是否存在
+                if (!ftpClient.changeWorkingDirectory(ftpAtt.getPath())) {
+                    ftpClient.makeDirectory(ftpAtt.getPath());
+                }
+                ftpClient.changeWorkingDirectory(ftpAtt.getPath());
                 ftpClient.storeFile(remoteFileName, input);
-            }else{
+            } else {
                 logger.error("链接失败！");
             }
         } catch (IOException e) {
@@ -135,6 +140,38 @@ public class FtpUtil {
         }
 
     }
+
+    /**
+     * 同样的文件，内容追加到文件
+     *
+     * @param ftpAtt
+     * @param input
+     * @param remoteFileName
+     */
+    public static void appendFile(FtpAtt ftpAtt, InputStream input, String remoteFileName) {
+        try {
+            if (ftpClient == null || !ftpClient.isConnected()) {
+                connectFtp(ftpAtt);
+            }
+            //创建目录
+            if (!ftpClient.changeWorkingDirectory(ftpAtt.getPath())) {
+                ftpClient.makeDirectory(ftpAtt.getPath());
+            }
+            ftpClient.changeWorkingDirectory(ftpAtt.getPath());
+            ftpClient.appendFile(remoteFileName, input);
+        } catch (IOException e) {
+            logger.error("文件" + remoteFileName + "上传到ftp失败", e);
+        } catch (Exception e) {
+            logger.error("文件" + remoteFileName + "上传到ftp失败", e);
+        } finally {
+            try {
+                input.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     /**
      * 下载链接配置
      *
@@ -164,7 +201,7 @@ public class FtpUtil {
             } catch (Exception e) {
                 logger.error(e);
                 logger.error("下载过程中出现异常");
-            }finally {
+            } finally {
                 closeFtp();
             }
         } else {
@@ -207,7 +244,7 @@ public class FtpUtil {
             } catch (Exception e) {
                 logger.error(e);
                 logger.error("下载过程中出现异常");
-            }finally {
+            } finally {
                 closeFtp();
             }
         } else {
