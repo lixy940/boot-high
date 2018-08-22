@@ -111,17 +111,17 @@ public class FtpUtil {
      * @Author: MR LIS
      * @Date: 15:43 2018/8/1
      */
-    public static void upload(FtpAtt ftpAtt, InputStream input, String remoteFileName) {
+    public static void upload(FtpAtt ftpAtt,InputStream input, String remoteFileName) {
 
         try {
-            if (connectFtp(ftpAtt)) {
+            if(connectFtp(ftpAtt)) {
                 //判断目录是否存在
                 if (!ftpClient.changeWorkingDirectory(ftpAtt.getPath())) {
                     ftpClient.makeDirectory(ftpAtt.getPath());
                 }
                 ftpClient.changeWorkingDirectory(ftpAtt.getPath());
                 ftpClient.storeFile(remoteFileName, input);
-            } else {
+            }else{
                 logger.error("链接失败！");
             }
         } catch (IOException e) {
@@ -153,7 +153,7 @@ public class FtpUtil {
                 connectFtp(ftpAtt);
             }
             //创建目录
-            if (!ftpClient.changeWorkingDirectory(ftpAtt.getPath())) {
+            if (!ftpClient.changeWorkingDirectory(ftpAtt.getPath())){
                 ftpClient.makeDirectory(ftpAtt.getPath());
             }
             ftpClient.changeWorkingDirectory(ftpAtt.getPath());
@@ -186,6 +186,11 @@ public class FtpUtil {
                 FTPFile[] files = null;
                 boolean changedir = ftpClient.changeWorkingDirectory(File.separator + remoteBaseDir);
                 if (changedir) {
+                    //判断目录是否存在
+                    File file = new File(localBaseDir);
+                    if (!file.exists()) {
+                        file.mkdirs();
+                    }
                     ftpClient.setControlEncoding(charset);
                     files = ftpClient.listFiles();
                     for (int i = 0; i < files.length; i++) {
@@ -200,7 +205,7 @@ public class FtpUtil {
             } catch (Exception e) {
                 logger.error(e);
                 logger.error("下载过程中出现异常");
-            } finally {
+            }finally {
                 closeFtp();
             }
         } else {
@@ -224,6 +229,11 @@ public class FtpUtil {
                 FTPFile[] files = null;
                 boolean changedir = ftpClient.changeWorkingDirectory(remoteBaseDir);
                 if (changedir) {
+                    //判断目录是否存在
+                    File file = new File(localBaseDir);
+                    if (!file.exists()) {
+                        file.mkdirs();
+                    }
                     ftpClient.setControlEncoding(charset);
                     files = ftpClient.listFiles();
                     for (int i = 0; i < files.length; i++) {
@@ -243,7 +253,7 @@ public class FtpUtil {
             } catch (Exception e) {
                 logger.error(e);
                 logger.error("下载过程中出现异常");
-            } finally {
+            }finally {
                 closeFtp();
             }
         } else {
