@@ -58,8 +58,11 @@ public class GenDBUtils {
             "\tA.attname AS column_name\n" +
             "FROM\n" +
             "\tpg_class AS C,\n" +
-            "\tpg_attribute AS A\n" +
+            "\tpg_attribute AS A,\n" +
+            "\tpg_namespace AS B\n" +
             "WHERE A.attrelid = C.oid\n" +
+            "AND C.relnamespace = B.oid\n" +
+            "AND C.relkind = 'r'\n" +
             "AND A.attnum > 0\n" +
             "AND C.relname = ";
 
@@ -280,7 +283,7 @@ public class GenDBUtils {
         } else if (DBTypeEnum.DB_ORACLE.getDbName().equals(dbType)) {
             sql = COLUMN_ORACLE_PREFIX + "'" + tableName + "'";
         } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equals(dbType)) {
-            sql = COLUMN_POSTGRES_PREFIX + "'" + tableName + "'";
+            sql = COLUMN_POSTGRES_PREFIX + "'"+tableName+"'"+" AND B.nspname = '"+tableSchema+"'";
         }
         return sql;
     }
