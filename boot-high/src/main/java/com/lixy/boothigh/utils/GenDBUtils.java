@@ -131,7 +131,7 @@ public class GenDBUtils {
             "r.relkind = 'r'\n" +
             "AND n.nspname = ";
     /**
-     * postgres库对应库对应的所有表记录数求和
+     * postgres库对应模式下的所有表记录数求和
      */
     private static String ROW_COUNT_POSTGRES_PREFIX = "SELECT\n" +
             "SUM(r.reltuples) as total_count\n" +
