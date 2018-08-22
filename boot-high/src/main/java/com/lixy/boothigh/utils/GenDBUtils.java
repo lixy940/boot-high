@@ -57,13 +57,14 @@ public class GenDBUtils {
             "\tformat_type (A.atttypid, A.atttypmod) AS data_type,\n" +
             "\tA.attname AS column_name\n" +
             "FROM\n" +
-            "\tpg_class AS C,\n" +
+            "\t\n" +
+            "  pg_class AS C,\n" +
             "\tpg_attribute AS A,\n" +
             "\tpg_namespace AS B\n" +
             "WHERE A.attrelid = C.oid\n" +
             "AND C.relnamespace = B.oid\n" +
-            "AND C.relkind = 'r'\n" +
             "AND A.attnum > 0\n" +
+            "AND A.attname NOT LIKE '%pg.dropped%'\n" +
             "AND C.relname = ";
 
     /**
