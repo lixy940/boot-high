@@ -557,7 +557,7 @@
         var tables = []
         var sch = $("#dbSelect").children("option:selected").attr("sc")
 
-        if (sch == "undefined") {
+        if (sch == undefined||sch==''||sch=='undefined') {
             sch = ""
         } else {
             sch += "."
