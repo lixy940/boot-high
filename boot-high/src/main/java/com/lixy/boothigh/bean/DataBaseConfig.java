@@ -36,6 +36,10 @@ public class DataBaseConfig {
      */
     private String dbTableSchema;
     /**
+     * postgresql库区分视图与表 r:表 v:视图
+     */
+    private String dbRelkind;
+    /**
      * 用户名
      */
     private String dbUser;
@@ -139,5 +143,13 @@ public class DataBaseConfig {
 
     public void setDbTableSchema(String dbTableSchema) {
         this.dbTableSchema = dbTableSchema;
+    }
+
+    public String getDbRelkind() {
+        return dbRelkind;
+    }
+
+    public void setDbRelkind(String dbRelkind) {
+        this.dbRelkind = dbRelkind;
     }
 }
