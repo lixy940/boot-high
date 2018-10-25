@@ -8,7 +8,7 @@ start(){
         echo :App  is  running pid=$pid
         exit -1
     fi
-    nohup java -jar $basepath/../boot-high-0.0.1-SNAPSHOT.jar --spring.config.location=$basepath/../config/application.properties --logging.config=$basepath/../config/logback.xml >/dev/null 2>&1 &
+    nohup java -jar $basepath/../boot-high-0.0.1-SNAPSHOT.jar --spring.config.location=$basepath/../config/application.properties --logging.config=$basepath/../config/logback-spring.xml >/dev/null 2>&1 &
     echo $!>$basepath/pid
     tail -f $basepath/../logs/boot-high.log
   }
