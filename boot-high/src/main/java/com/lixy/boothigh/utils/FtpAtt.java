@@ -1,5 +1,6 @@
 package com.lixy.boothigh.utils;
 
+
 import com.lixy.boothigh.constants.BConstant;
 
 /**
@@ -28,6 +29,7 @@ public class FtpAtt {
      * 目录名称
      */
     private String path;
+
     public FtpAtt() {
     }
 
@@ -42,6 +44,11 @@ public class FtpAtt {
     public static FtpAtt getDefaultConfig(){
         return new FtpAtt(BConstant.FTP_IP, BConstant.FTP_PORT, BConstant.FTP_USERNAME, BConstant.FTP_PASSWORD, BConstant.FTP_DIR);
     }
+
+    public static FtpAtt getFtpAttConfig(String path){
+        return new FtpAtt(BConstant.FTP_IP, BConstant.FTP_PORT, BConstant.FTP_USERNAME, BConstant.FTP_PASSWORD, path);
+    }
+
     public String getIpAddr() {
         return ipAddr;
     }

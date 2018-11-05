@@ -1,4 +1,5 @@
 package com.lixy.boothigh.utils;
+
 /**
  * @Author: MR LIS
  * @Description:
@@ -13,6 +14,7 @@ import org.apache.commons.net.ftp.FTPReply;
 import org.apache.log4j.Logger;
 
 import java.io.*;
+import java.util.StringTokenizer;
 
 /**
  * ftp工具类
@@ -117,7 +119,7 @@ public class FtpUtil {
             if(connectFtp(ftpAtt)) {
                 //判断目录是否存在
                 if (!ftpClient.changeWorkingDirectory(ftpAtt.getPath())) {
-                    ftpClient.makeDirectory(ftpAtt.getPath());
+                    createDirectory(ftpAtt.getPath());
                 }
                 ftpClient.changeWorkingDirectory(ftpAtt.getPath());
                 ftpClient.storeFile(remoteFileName, input);
@@ -326,20 +328,47 @@ public class FtpUtil {
         }
     }
 
+    private static boolean createDirectory(String path) {
+        boolean flag = true;
+        StringTokenizer s = new StringTokenizer(path, "/");
+
+        s.countTokens();
+
+        String pathName = "";
+
+        while (s.hasMoreElements()) {
+
+            pathName = pathName + "/" + (String) s.nextElement();
+
+            try {
+
+                ftpClient.mkd(pathName);
+
+            } catch (Exception e) {
+                logger.info("ftp文件夹创建失败");
+                flag = false;
+            }
+
+        }
+        return flag;
+    }
+
 
     public static void main(String[] args) throws Exception {
+
         FtpAtt f = new FtpAtt();
         f.setIpAddr("192.168.19.161");
         f.setUserName("ftpserver");
         f.setPwd("ftp@123456");
-        f.setPath("excelDir");
+        f.setPath("/excelDir/21080910/12/11");
 //        FtpUtil.connectFtp(f);
-/*        File file = new File("D:\\fileDir\\excel\\81_syscategoryinfo.xlsx");
-        FtpUtil.upload(new FileInputStream(file),"hhhh2.xlsx");*/
-//        FtpUtil.upload(file);//把文件上传在ftp上
-//        FtpUtil.downLoad(f, "e:/",  "excelDir");//下载ftp文件测试
-        FtpUtil.downLoad(f, "e:/", "/excelDir", "521dcb681d954526bb1aed1dd187f2bf.xlsx");//下载ftp文件测试
-        System.out.println("ok");
+//        boolean directory = FtpUtil.createDirectory(f.getPath());
+//        System.out.println(directory);
+//        File file = new File("D:\\代码走查单.xlsx");
+//        FtpUtil.upload(f,new FileInputStream(file),"1111.xlsx");
+        FtpUtil.connectFtp(f);
+        FtpUtil.downLoad(f, "e:/", "/excelDir/21080910/12/11", "1111.xlsx");//下载ftp文件测试
+//        System.out.println("ok");
 
     }
 }

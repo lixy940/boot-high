@@ -3,6 +3,7 @@ package com.lixy.boothigh.controller;
 import com.lixy.boothigh.aop.SystemControllerLog;
 import com.lixy.boothigh.constants.BConstant;
 import com.lixy.boothigh.excep.ServiceException;
+import com.lixy.boothigh.utils.FileRWUtils;
 import com.lixy.boothigh.utils.FtpAtt;
 import com.lixy.boothigh.utils.FtpUtil;
 import com.lixy.boothigh.vo.page.JsonResult;
@@ -102,11 +103,17 @@ public class ExcelImportController {
             if (isCreateSuccess) {
                 file.transferTo(savedFile);  //转存文件
             }*/
-            //存储文件到ftp上
-            FtpUtil.upload(FtpAtt.getDefaultConfig(),file.getInputStream(),savedFileName);
-            //FTP上下载到本地指定目录
-            FtpUtil.downLoad(FtpAtt.getDefaultConfig(),BConstant.EXCEL_UPLOAD_DIR,BConstant.FTP_DIR,savedFileName);
 
+            //当前月
+            String remoteFtpDir = BConstant.FTP_DIR+ FileRWUtils.getCurrentMonthPath();
+            /**
+             * 上传到ftp
+             */
+            FtpUtil.upload(FtpAtt.getFtpAttConfig(remoteFtpDir),file.getInputStream(),savedFileName);
+//            FtpUtil.upload(FtpAtt.getDefaultConfig(),file.getInputStream(),savedFileName);
+            //FTP上下载到本地指定目录
+//            FtpUtil.downLoad(FtpAtt.getDefaultConfig(),BConstant.EXCEL_UPLOAD_DIR,BConstant.FTP_DIR,savedFileName);
+            FtpUtil.downLoad(FtpAtt.getDefaultConfig(),BConstant.EXCEL_UPLOAD_DIR,remoteFtpDir,savedFileName);
         } catch (ServiceException e) {
             jsonResult.setState(1);
             jsonResult.setMessage(e.getMessageTip());
