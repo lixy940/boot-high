@@ -1,5 +1,6 @@
 package com.lixy.boothigh.utils;
 
+
 /**
  * @Author: MR LIS
  * @Description:
@@ -12,6 +13,7 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 import org.apache.log4j.Logger;
+import sun.net.ftp.FtpProtocolException;
 
 import java.io.*;
 import java.util.StringTokenizer;
@@ -353,22 +355,48 @@ public class FtpUtil {
         return flag;
     }
 
+    public static InputStream getFtpFileStream(FtpAtt ftpAtt,String remoteFileName) throws Exception{
+        if(connectFtp(ftpAtt)){
+            boolean changedir = ftpClient.changeWorkingDirectory(ftpAtt.getPath());
+            if (!changedir) {
+                logger.error(ftpAtt.getPath()+"目录不存在");
+            }
+            // 获取ftp上的文件
+            return ftpClient.retrieveFileStream(remoteFileName);
+        }else{
+            logger.error("链接失败！");
+            return null;
+        }
+    }
+
 
     public static void main(String[] args) throws Exception {
 
-        FtpAtt f = new FtpAtt();
-        f.setIpAddr("192.168.19.161");
+/*        FtpAtt f = new FtpAtt();
+        f.setIpAddr("192.168.19.23");
         f.setUserName("ftpserver");
         f.setPwd("ftp@123456");
         f.setPath("/excelDir/21080910/12/11");
-//        FtpUtil.connectFtp(f);
-//        boolean directory = FtpUtil.createDirectory(f.getPath());
-//        System.out.println(directory);
-//        File file = new File("D:\\代码走查单.xlsx");
-//        FtpUtil.upload(f,new FileInputStream(file),"1111.xlsx");
+        FtpUtil.connectFtp(f);
+        boolean directory = FtpUtil.createDirectory(f.getPath());
+        System.out.println(directory);
+        File file = new File("D:\\代码走查单.xlsx");
+        FtpUtil.upload(f,new FileInputStream(file),"1111.xlsx");
         FtpUtil.connectFtp(f);
         FtpUtil.downLoad(f, "e:/", "/excelDir/21080910/12/11", "1111.xlsx");//下载ftp文件测试
-//        System.out.println("ok");
+        System.out.println("ok");*/
 
+
+        FtpAtt f = new FtpAtt();
+        f.setIpAddr("192.168.19.23");
+        f.setPort(21);
+        f.setUserName("ftpserver");
+        f.setPwd("ftp@123456");
+/*        f.setPath("/noderel");
+        FtpUtil.appendFile(f,new ByteArrayInputStream("你好吗\n".getBytes()),"111.txt");
+        FtpUtil.connectFtp(f);*/
+
+        FtpUtil.connectFtp(f);
+        FtpUtil.downLoad(f, "e:/", "/noderel", "491_07ab5bc4e04e4667af7e0e4913763b3c.txt");
     }
 }

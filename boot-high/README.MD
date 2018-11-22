@@ -24,3 +24,112 @@
 <p/>
 <p>12.登录或登出，进行cookie控制，如CookieUtil及LoginController<p/>
 <p>13.增加ftp逻辑，FtpUtil类和ExcelImportController类可参看调用，注意上传的文件名不支出中文<p/>
+<p>14.ftp的使用场景，如：当使用数据库某个字段存储上万条对象转换为json字符串的记录时，由于一个字段存储的数据
+太大，对应mysql，如果使用longtext，也会占用很大内存，因此采用将集合对象存储到txt文件里，并上传到ftp,采用追加的方式
+每个对象为一行，当需要进行分页展示时，可读取行进行分页展示
+
+如：将每一批数据的每个对象按照\n换行后拼接为字符串后上传到ftp
+
+上传使用(在一个线程中不断从队列中取数据，然后去重，插入一天记录到template_history_data表
+并上传到ftp)：
+
+    while (true){
+             try {
+ 
+                 TempletInfoDTO templetInfoDTO = templetInfos.take();
+ 
+                 List<NodeRelCustomDTO> nodeRelCustoms = templetInfoDTO.getNodeRelCustoms().stream().distinct().collect(Collectors.toList());
+ 
+                 TemplateHistoryData templateHistoryData = templateHistoryDataMapper.selectByTemplateUploadId(templetInfoDTO.getUploadPathId());
+                 if(templateHistoryData==null){
+                     templateHistoryData = new TemplateHistoryData();
+                     templateHistoryData.setTemplateUploadId(templetInfoDTO.getUploadPathId());
+                     templateHistoryData.setType(templetInfoDTO.getDataType());
+                     templateHistoryData.setRelNodeNum(nodeRelCustoms.size());
+                     //生成文件名
+                     String nameU = UUID.randomUUID().toString().replace("-", "").concat(".txt");
+                     String remotefileName = templateHistoryData.getTemplateUploadId() + "_" + nameU;
+                     templateHistoryData.setRemoteFileName(remotefileName);
+                     templateHistoryDataMapper.insert(templateHistoryData);
+                 }else{
+                     templateHistoryData.setRelNodeNum(templateHistoryData.getRelNodeNum()+nodeRelCustoms.size());
+                     templateHistoryDataMapper.updateByTemplateUploadId(templateHistoryData);
+                 }
+ 
+                 /**
+                  * 数据遍历上传到ftp
+                  */
+                 String content = "";
+                 for (NodeRelCustomDTO nodeRelCustom : nodeRelCustoms) {
+                      content += JSONObject.toJSONString(nodeRelCustom) + "\n";
+                 }
+ 
+                 FtpUtil.appendFile(FtpAtt.getFtpAttConfig(BConstant.FTP_NODE_REL),new ByteArrayInputStream(content.getBytes()),templateHistoryData.getRemoteFileName());
+ 
+ 
+                 logger.info("--------当前[{}]的---节点或关系数为 [{}] 个",templateHistoryData.getTemplateUploadId(),templateHistoryData.getRelNodeNum());
+ 
+ 
+ 
+             } catch (InterruptedException e) {
+                 e.printStackTrace();
+             }
+         }
+    
+ 分页使用：
+
+    public NodeRelCustomPage findNodeRelCustomPageByCondition(Integer uploadFileId, int pageNo, int pageSize) throws Exception {
+ 
+         NodeRelCustomPage nodeRelCustomPage = new NodeRelCustomPage();
+ 
+         List<NodeRelCustomDTO> relCustomDTOS = new ArrayList<>();
+         //查询模板导入节点关系历史数据
+         TemplateHistoryData templateHistoryData = templateHistoryDataMapper.selectByTemplateUploadId(uploadFileId);
+         if (templateHistoryData == null) {
+             logger.error("模板上传id[{}]记录不存在", templateHistoryData.getTemplateUploadId());
+         }
+         //包含当前页的记录数和总记录数
+         nodeRelCustomPage.setNodeRelCustomDTOList(relCustomDTOS);
+         nodeRelCustomPage.setTotalCount(templateHistoryData.getRelNodeNum());
+ 
+         //计算分页开始点和结束点
+         int start = (pageNo - 1) * pageSize + 1;
+         int end = pageNo * pageSize > templateHistoryData.getRelNodeNum() ? templateHistoryData.getRelNodeNum() : pageNo * pageSize;
+ 
+ 
+         BufferedReader br = null;
+         InputStream inputStream = null;
+         try {
+             // 获取ftp上的文件
+             inputStream = FtpUtil.getFtpFileStream(FtpAtt.getFtpAttConfig(BConstant.FTP_NODE_REL), templateHistoryData.getRemoteFileName());
+             //转为字节流
+             br = new BufferedReader(new InputStreamReader(inputStream));
+             String str = null;
+             int index = 1;
+             while ((str = br.readLine()) != null) {
+                 if (index >= start && index <= end) {
+                     NodeRelCustomDTO nodeRelCustomDTO = JSONObject.parseObject(str, NodeRelCustomDTO.class);
+                     relCustomDTOS.add(nodeRelCustomDTO);
+                 }
+                 //如果已经大于end,直接退出
+                 if (index > end) {
+                     break;
+                 }
+                 index++;
+             }
+         } finally {
+             if (br != null) {
+                 br.close();
+             }
+             if (inputStream != null) {
+                 inputStream.close();
+             }
+         }
+         return nodeRelCustomPage;
+     }
+     
+ 其中 TemplateHistoryData对象专门建了一张表template_history_data永于存储上传id和存储到ftp上时的文件名及总记录数
+ 在resources的db目录下    
+ 
+   
+</p>
