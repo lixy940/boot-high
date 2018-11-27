@@ -252,9 +252,6 @@
 					</archive>
 					<excludes>
 						<exclude>*.properties</exclude>
-						<exclude>dubbo-config.xml</exclude>
-						<exclude>dubbo-consumer.xml</exclude>
-						<exclude>dubbo-provider.xml</exclude>
 						<exclude>logback-spring.xml</exclude>
 						<exclude>bin</exclude>
 					</excludes>
