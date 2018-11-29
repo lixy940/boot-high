@@ -5,6 +5,11 @@ import com.lixy.boothigh.vo.page.JsonResult;
 import io.swagger.annotations.*;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+
 /**
  * @Author: MR LIS
  * @Description:
@@ -50,5 +55,29 @@ public class TestIndexController {
     public JsonResult swaggerMethod(@RequestParam("username") String username, @RequestParam("password") String password, @PathVariable("phone")String phone) {
         JsonResult jsonResult = new JsonResult();
         return jsonResult;
+    }
+
+
+    /**
+     * post方法参数放入body的获取方式
+     * @param request
+     */
+    @ApiOperation(value = "post方法参数放入body的获取方式", notes = "post方法参数放入body的获取方式", response = JsonResult.class)
+    @PostMapping("/requestBodyMethod")
+    public void requestBodyMethod(HttpServletRequest request) {
+
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(request.getInputStream()));
+            String str = "";
+            String wholeStr = "";
+            //一行一行的读取body体里面的内容；
+            while((str = reader.readLine()) != null){
+                wholeStr += str;
+            }
+            System.out.println("requestBody："+wholeStr);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 }
