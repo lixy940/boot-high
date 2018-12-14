@@ -46,7 +46,7 @@ public class PersistentDataResultServiceImpl implements PersistentDataResultServ
             SourceDataInfoShowVO showVO = new SourceDataInfoShowVO();
             SourceDataInfoVO sourceVO = new SourceDataInfoVO(result.getDbId(),result.getResultEname(),result.getResultCname(), SourceDataTypeEnum.Result.getCode());
             showVO.setSourceDataInfoVO(sourceVO);
-            showVO.setCount(result.getRowNum());
+            showVO.setCount((long)result.getRowNum());
             showVOList.add(showVO);
         });
 

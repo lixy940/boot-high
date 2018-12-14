@@ -1,9 +1,11 @@
 package com.lixy.boothigh.utils;
+
 import com.lixy.boothigh.bean.DataBaseConfig;
 import com.lixy.boothigh.enums.DBTypeEnum;
 import com.lixy.boothigh.enums.DbDataTypeEnum;
 import com.lixy.boothigh.enums.DriverNameEnum;
 import com.lixy.boothigh.enums.SourceDataTypeEnum;
+import com.lixy.boothigh.vo.ConditionVo;
 import com.lixy.boothigh.vo.SourceDataInfoShowVO;
 import com.lixy.boothigh.vo.SourceDataInfoVO;
 import com.lixy.boothigh.vo.page.ColumnInfoVO;
@@ -371,6 +373,15 @@ public class GenDBUtils {
     /**
      * @return
      * @Author: MR LIS
+     * @Description: 查询分页总记录数
+     * @Date: 10:05 2018/12/14
+     */
+    public static int executePageTotalCountWithCondition(DataBaseConfig dataBaseConfig, String tableName,List<ConditionVo> conditionVos) {
+        return queryPageTotalCount(dataBaseConfig, pagingCountSqlWithCondition(dataBaseConfig.getDbType(), tableName, dataBaseConfig.getDbTableSchema(),conditionVos));
+    }
+    /**
+     * @return
+     * @Author: MR LIS
      * @Description: 查询总记录数
      * @Date: 10:05 2018/5/25
      */
@@ -410,6 +421,15 @@ public class GenDBUtils {
     /**
      * @return
      * @Author: MR LIS
+     * @Description: 查询带条件分页记录结果, 不含总记录数
+     * @Date: 10:05 2018/12/14
+     */
+    public static List<List<Object>> executePageWithCondition(DataBaseConfig dataBaseConfig, String tableName, List<ConditionVo> conditionVos, int pageSize, int start, int end) {
+        return executePageRecord(dataBaseConfig, pagingSqlWithCondition(dataBaseConfig.getDbType(), tableName,conditionVos, dataBaseConfig.getDbTableSchema(), pageSize, start, end));
+    }
+    /**
+     * @return
+     * @Author: MR LIS
      * @Description: 查询分页记录结果, 不含总记录数
      * @Date: 10:05 2018/5/25
      */
@@ -417,6 +437,7 @@ public class GenDBUtils {
 
         return executePageRecord(dataBaseConfig, pagingSql(dataBaseConfig.getDbType(), tableName, dataBaseConfig.getDbTableSchema(), columnArrStr, pageSize, start, end));
     }
+
 
     /**
      * @return
@@ -490,6 +511,33 @@ public class GenDBUtils {
         return countSql;
     }
 
+    /**
+     * @return
+     * @Author: MR LIS
+     * @Description: 带条件的总记录数sql
+     * @Date: 9:56 2018/12/14
+     */
+    public static String pagingCountSqlWithCondition(String dbType, String tableName, String tableSchema,List<ConditionVo> conditionVos) {
+        if (StringUtils.isEmpty(dbType) || StringUtils.isEmpty(tableName)) {
+            throw new RuntimeException("sql或者数据库类型不能为空！");
+        }
+        String conditionSql =geneConditionSql(conditionVos);
+        String countSql = "";
+        if (DBTypeEnum.DB_MYSQL.getDbName().equalsIgnoreCase(dbType) || DBTypeEnum.DB_TIDB.getDbName().equals(dbType)) {
+            countSql = "select count(*) as count from " + tableName ;
+
+        } else if (DBTypeEnum.DB_ORACLE.getDbName().equalsIgnoreCase(dbType)) {
+            countSql = "select count(*) as count from " + tableName ;
+
+        } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equalsIgnoreCase(dbType)) {
+            countSql = "select count(*) as count from " + tableSchema + "." + tableName ;
+        }
+
+        //加上条件sql
+        countSql += conditionSql;
+
+        return countSql;
+    }
 
     /**
      * @return
@@ -514,6 +562,57 @@ public class GenDBUtils {
         }
 
         return querySql;
+    }
+
+    /**
+     * @return
+     * @Author: MR LIS
+     * @Description: 分页sql
+     * @Date: 9:56 2018/5/25
+     */
+    public static String pagingSqlWithCondition(String dbType, String tableName, List<ConditionVo> conditionVos, String tableSchema, Integer size, Integer start, Integer end) {
+        if (StringUtils.isEmpty(dbType) || StringUtils.isEmpty(tableName)) {
+            throw new RuntimeException("sql或者数据库类型不能为空！");
+        }
+        String conditionSql = geneConditionSql(conditionVos);
+        String querySql = "";
+        if (DBTypeEnum.DB_MYSQL.getDbName().equalsIgnoreCase(dbType) || DBTypeEnum.DB_TIDB.getDbName().equals(dbType)) {
+            querySql = "select * from " + tableName +conditionSql +" limit " + start + "," + size;
+
+        } else if (DBTypeEnum.DB_ORACLE.getDbName().equalsIgnoreCase(dbType)) {
+            if(conditionVos.isEmpty()) {
+                querySql = "select * from (select T.*,ROWNUM RN from " + tableName + "  T where ROWNUM <= " + end + ") where RN >" + start;
+            }else {
+                querySql = "select * from (select T.*,ROWNUM RN from " + tableName + "  T " + conditionSql + " and ROWNUM <= " + end + ") where RN >" + start;
+            }
+
+        } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equalsIgnoreCase(dbType)) {
+            querySql = "select * from " + tableSchema + "." + tableName +conditionSql+ " limit " + size + " offset  " + start;
+
+        }
+        return querySql;
+    }
+
+    /**
+     * 生成条件sql
+     * @param conditionVos
+     * @return
+     */
+    private static String geneConditionSql(List<ConditionVo> conditionVos) {
+        String conditionSql = "";
+        if (conditionVos != null) {
+            int i=0;
+            for (ConditionVo vo : conditionVos) {
+                if (i == 0) {
+                    conditionSql += " where ";
+                }else {
+                    conditionSql += " and ";
+                }
+                conditionSql += vo.getKey()+"="+"'"+vo.getValue()+"'";
+                i++;
+            }
+        }
+        return conditionSql;
     }
 
     /**
@@ -641,7 +740,7 @@ public class GenDBUtils {
             while (rs.next()) {
                 showVO = new SourceDataInfoShowVO();
                 SourceDataInfoVO sourceVO = new SourceDataInfoVO(dataBaseConfig.getDbId(), rs.getString(TABLE_NAME), rs.getString(TABLE_COMMENT) == null ? "" : rs.getString(TABLE_COMMENT), SourceDataTypeEnum.LOCAL.getCode());
-                showVO.setCount(rs.getInt(TABLE_ROWNUM));
+                showVO.setCount(rs.getLong(TABLE_ROWNUM));
                 showVO.setSourceDataInfoVO(sourceVO);
                 showVOs.add(showVO);
             }
@@ -846,7 +945,7 @@ public class GenDBUtils {
      * @param stmt
      * @param rs
      */
-    public synchronized static void closeConn(Connection conn, PreparedStatement stmt, ResultSet rs) {
+    private synchronized static void closeConn(Connection conn, PreparedStatement stmt, ResultSet rs) {
         try {
             if (stmt != null) {
                 stmt.close();

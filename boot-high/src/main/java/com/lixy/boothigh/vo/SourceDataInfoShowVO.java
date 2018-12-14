@@ -15,7 +15,7 @@ public class SourceDataInfoShowVO {
     /**
      * 行数
      */
-    private  Integer count;
+    private  Long count;
 
 
 
@@ -27,12 +27,11 @@ public class SourceDataInfoShowVO {
         this.sourceDataInfoVO = sourceDataInfoVO;
     }
 
-    public Integer getCount() {
+    public Long getCount() {
         return count;
     }
 
-    public void setCount(Integer count) {
+    public void setCount(Long count) {
         this.count = count;
     }
-
 }

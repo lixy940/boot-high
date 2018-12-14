@@ -46,7 +46,6 @@ public class ConnectionPoolTest {
 
         for (int i = 0; i < 5; i++) {
             Connection con = list.remove(i);
-            GenDBUtils.closeConn(con,null,null);
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {

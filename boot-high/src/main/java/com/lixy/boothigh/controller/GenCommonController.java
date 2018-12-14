@@ -5,9 +5,10 @@ import com.lixy.boothigh.enums.ResultEnum;
 import com.lixy.boothigh.excep.ServiceException;
 import com.lixy.boothigh.service.GenCommonService;
 import com.lixy.boothigh.utils.RedisLock;
+import com.lixy.boothigh.vo.ConditionCountVo;
+import com.lixy.boothigh.vo.ConditionPageVo;
 import com.lixy.boothigh.vo.page.ColumnInfoVO;
 import com.lixy.boothigh.vo.page.JsonResult;
-import com.lixy.boothigh.vo.page.SandPageViewVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -15,12 +16,8 @@ import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -146,6 +143,54 @@ public class GenCommonController {
         return jsonResult;
     }
 
-    
 
+    /**
+     * @return
+     * @Author: MR LIS
+     * @Description: 获取分页列表信息
+     * @Date: 16:46 2018/5/25
+     */
+    @ApiOperation(value = "获取带条件分页列表总记录数", notes = "获取带条件分页列表总记录数", response = JsonResult.class)
+    @PostMapping("/executePageTotalCountWithCondition")
+    public JsonResult executePageTotalCountWithCondition(@RequestBody ConditionCountVo countVo) {
+        JsonResult responseResult = new JsonResult();
+        try {
+            int totalCount = genCommonService.executePageTotalCountWithCondition(countVo);
+            responseResult.setData(totalCount);
+
+        } catch (ServiceException e) {
+            logger.error("获取带条件分页列表总记录数异常:{}", e.getMessage(), e);
+            responseResult.setState(ResultEnum.SERVER_ERROR.getValue());
+            responseResult.setMessage("获取带条件分页列表总记录数异常：" + e.getMessage());
+        } catch (Exception e) {
+        }
+        return responseResult;
+    }
+
+    /**
+     * @return
+     * @Author: MR LIS
+     * @Description: 获取分页列表信息, 不进行总记录数查询
+     * @Date: 16:46 2018/5/25
+     */
+    @ApiOperation(value = "获取不含总记录数的带条件分页列表", notes = "获取带条件分页列表信息,不返回总记录数", response = JsonResult.class)
+    @PostMapping("/executePageNotCountWithCondition")
+    public JsonResult executePageNotCountWithCondition(@RequestBody ConditionPageVo pageVo) {
+        JsonResult responseResult = new JsonResult();
+        try {
+
+            List<List<Object>> dataList = genCommonService.executePageQueryNotCountWithCondition(pageVo);
+            responseResult.setData(dataList);
+
+        } catch (ServiceException e) {
+            logger.error("获取带分页分页列表信息异常:{}", e.getMessage(),e);
+            responseResult.setState(ResultEnum.SERVER_ERROR.getValue());
+            responseResult.setMessage("获取带分页分页列表信息异常：" + e.getMessage());
+        } catch (Exception e) {
+            logger.error("获取带分页分页列表信息异常:{}", e.getMessage(),e);
+            responseResult.setState(ResultEnum.SERVER_ERROR.getValue());
+            responseResult.setMessage("服务器错误");
+        }
+        return responseResult;
+    }
 }
