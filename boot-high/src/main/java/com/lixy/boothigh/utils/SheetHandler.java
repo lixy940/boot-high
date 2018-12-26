@@ -23,7 +23,7 @@ import java.util.*;
  * 自定义解析处理器 See org.xml.sax.helpers.DefaultHandler javadocs
  */
 public class SheetHandler extends DefaultHandler {
-    private  String cs;
+    private String cs;
     private StylesTable stylesTable;
 
     private SharedStringsTable sst;
@@ -45,12 +45,13 @@ public class SheetHandler extends DefaultHandler {
     private short formatIndex;
     private String formatString;
 
-    private Map map = new HashMap();;
+    private Map map = new HashMap();
+    ;
 
     /**
      * 定义的验证通过的数据
      */
-    private List<String> dataList = new ArrayList();
+    private List<String[]> dataList = new ArrayList();
     /**
      * 定义验证失败的数据，包含重复和空等验证
      */
@@ -65,7 +66,6 @@ public class SheetHandler extends DefaultHandler {
      */
     private Integer[] colIndexList;
 
-
     // 用一个enum表示单元格可能的数据类型
     enum CellDataType {
         BOOL, ERROR, FORMULA, INLINESTR, SSTINDEX, NUMBER, DATE, NULL
@@ -74,7 +74,7 @@ public class SheetHandler extends DefaultHandler {
     public SheetHandler(SharedStringsTable sst, StylesTable stylesTable, List dataList) {
         this.sst = sst;
         this.dataList = dataList;
-        this.stylesTable= stylesTable;
+        this.stylesTable = stylesTable;
     }
 
     /**
@@ -162,16 +162,16 @@ public class SheetHandler extends DefaultHandler {
             throws SAXException {
         // Process the last contents as required.
         // Do now, as characters() may be called more than once
-        String flag =(String)map.get("flag");
+        String flag = (String) map.get("flag");
 
         if (nextIsString) {
             if ("s".equals(cs)) {
                 int idx = Integer.parseInt(lastContents.toString());
-                lastContents =new XSSFRichTextString(sst.getEntryAt(idx)).toString();
+                lastContents = new XSSFRichTextString(sst.getEntryAt(idx)).toString();
                 nextIsString = false;
             }
             if ("c".equals(name) && "x".equals(cs)) {
-                if("start".equals(flag)){
+                if ("start".equals(flag)) {
                     rowlist.add(curCol, "");
                     curCol++;
                 }
@@ -189,6 +189,7 @@ public class SheetHandler extends DefaultHandler {
             if (!ref.equals(preRef)) {
                 int len = countNullCell(ref, preRef);
                 for (int i = 0; i < len; i++) {
+
                     rowlist.add(curCol, "");
                     curCol++;
                 }
@@ -217,7 +218,8 @@ public class SheetHandler extends DefaultHandler {
                  * 1.拼接一行的数据，此处属于一行结束，也可在此对一行数据直接进行处理，建议在外面处理，减少侵入
                  * 2.此处亦可以对数据进行过滤，对不符合条件的数据进行过滤及重复校验，导入数据时需要验证一些值
                  **/
-                for (int i = 0; i < rowlist.size(); i++) {
+                /*for (int i = 0; i < rowlist.size(); i++) {
+
                     if (rowlist.get(i).contains(",")) {
                         value += "\"" + rowlist.get(i) + "\",";
 
@@ -228,7 +230,7 @@ public class SheetHandler extends DefaultHandler {
                             value += rowlist.get(i) + ",";
                         }
                     }
-                }
+                }*/
 
                 // 加换行符
 //                value += "\n";
@@ -237,7 +239,7 @@ public class SheetHandler extends DefaultHandler {
                     dataList.add(value);
                 }
 */
-                dataList.add(value);
+                dataList.add(rowlist.toArray(new String[0]));
                 //行数加1，并重置一些数据
                 curRow++;
                 rowlist.clear();
@@ -365,16 +367,16 @@ public class SheetHandler extends DefaultHandler {
     }
 
     /**
+     * @return
      * @Author: MR LIS
      * @Description: 根据列序号，指定需要根据那几列的值作为key放入set集合如：[1,2,4],将第1，2,4列的值以下划线的方式作为key放入
      * @Date: 17:09 2018/4/9
-     * @return
      */
-    private boolean validateRepeat(List<String> rowlist){
+    private boolean validateRepeat(List<String> rowlist) {
         String key = assembleKey(rowlist);
 
         //如果不包含，就将其放入passRepeatSet,并返回false
-        if(!passRepeatSet.contains(key)){
+        if (!passRepeatSet.contains(key)) {
             passRepeatSet.add(key);
             return false;
         }
@@ -383,10 +385,10 @@ public class SheetHandler extends DefaultHandler {
         String str = "由";
         int size = rowlist.size();
         for (int i = 0; i < size; i++) {
-            if(i==size-1){
-                str += "【"+rowlist.get(i)+"】确定的唯一性已存在，重复数据" ;
-            }else {
-                str += "【"+rowlist.get(i)+"】、" ;
+            if (i == size - 1) {
+                str += "【" + rowlist.get(i) + "】确定的唯一性已存在，重复数据";
+            } else {
+                str += "【" + rowlist.get(i) + "】、";
             }
         }
 
@@ -398,18 +400,18 @@ public class SheetHandler extends DefaultHandler {
     }
 
     /**
-     * @Author: MR LIS
-     * @Description: 拼装[1,2,4],将第1，2,4列的值以下划线的方式作为key
-     * @Date: 17:32 2018/4/9
      * @return
+     * @Author: MR LIS
+     * @Description: 拼装[1, 2, 4], 将第1，2,4列的值以下划线的方式作为key
+     * @Date: 17:32 2018/4/9
      */
-    private String assembleKey(List<String> rowlist){
+    private String assembleKey(List<String> rowlist) {
         String key = "";
         int length = colIndexList.length;
-        for (int i = 0; i <length; i++) {
-            if(i==length-1){
+        for (int i = 0; i < length; i++) {
+            if (i == length - 1) {
                 key += rowlist.get(colIndexList[i]);
-            }else{
+            } else {
                 key += rowlist.get(colIndexList[i]) + "_";
             }
         }
@@ -419,16 +421,17 @@ public class SheetHandler extends DefaultHandler {
 
     /**
      * 添加重复信息到列表
+     *
      * @param rowlist
      */
-    private void addFailInfo(List<String> rowlist){
+    private void addFailInfo(List<String> rowlist) {
         String key = "由";
         int length = colIndexList.length;
-        for (int i = 0; i <length; i++) {
-            if(i==length-1){
-                key += "【"+rowlist.get(colIndexList[i])+"】确定的唯一性已存在，重复数据";
-            }else{
-                key += "【"+rowlist.get(colIndexList[i])+"】、";
+        for (int i = 0; i < length; i++) {
+            if (i == length - 1) {
+                key += "【" + rowlist.get(colIndexList[i]) + "】确定的唯一性已存在，重复数据";
+            } else {
+                key += "【" + rowlist.get(colIndexList[i]) + "】、";
             }
         }
 

@@ -26,7 +26,7 @@ public class ExcelSAXParserUtil {
     /**
      * 定义的验证通过的数据
      */
-    private List<String> dataList = new ArrayList();
+    private List<String[]> dataList = new ArrayList<>();
 
     /**
      * 处理一个sheet
@@ -83,9 +83,9 @@ public class ExcelSAXParserUtil {
      *
      * @param sst
      * @return
-     * @throws SAXException
+     * @throws org.xml.sax.SAXException
      */
-    public XMLReader fetchSheetParser(SharedStringsTable sst, StylesTable stylesTable)
+    public XMLReader fetchSheetParser(SharedStringsTable sst,StylesTable stylesTable)
             throws SAXException {
         XMLReader parser = XMLReaderFactory
                 .createXMLReader("org.apache.xerces.parsers.SAXParser");
@@ -95,18 +95,24 @@ public class ExcelSAXParserUtil {
     }
 
 
-    public List<String> getDataList() {
+    public List<String[]> getDataList() {
         return dataList;
     }
+
+/*    public List<String[]> getSandDataList() {
+        List<String[]> list = new ArrayList<>();
+        dataList.forEach(k->{
+            list.add(k.split(",",-1));
+        });
+        return list;
+    }*/
 
 
 
     public static void main(String[] args) throws Exception {
         ExcelSAXParserUtil example = new ExcelSAXParserUtil();
         // String str = "Book1";
-        String filename = "E:\\TDown\\data.xlsx";
-        System.out.println("-- 程序开始 --");
-        long time_1 = System.currentTimeMillis();
+        String filename = "D:\\output\\dd.xlsx";
         try {
             example.processOneSheet(filename);
         } catch (Exception e){
@@ -114,16 +120,6 @@ public class ExcelSAXParserUtil {
         } finally {
         }
 
-        long time_2 = System.currentTimeMillis();
-        System.out.println("-- 程序结束1 --");
-        System.out.println("-- 耗时1 --" + (time_2 - time_1) / 1000 + "s");
-
-        //处理每条记录
-        doOneRowCheck(example.getDataList());
-
-
-        System.out.println("-- 程序结束2 --");
-        System.out.println("-- 耗时2--" + (time_2 - time_1) / 1000 + "s");
 
     }
 
@@ -138,7 +134,7 @@ public class ExcelSAXParserUtil {
     private static void doOneRowCheck(List<String> dataList) {
 
         for (String s : dataList) {
-            System.out.println(s);
+//            System.out.println("ExcelSAXParserUtil,doOneRowCheck,"+s);
             //分割后，进行每列数据的处理
 //            String[] split = s.split(",");
         }

@@ -91,7 +91,7 @@ public class ExcelSynThread implements Runnable {
                 //数据集
                 ExcelSAXParserUtil parserUtil = new ExcelSAXParserUtil();
                 parserUtil.processOneSheet(sysFilePath.getPath());
-                List<String> dataList = parserUtil.getDataList();
+                List<String[]> dataList = parserUtil.getDataList();
                 //没有数据直接返回，设置任务为已完成
                 if (dataList == null || dataList.isEmpty()) {
                     taskVO.setEsFlag(true);
@@ -105,13 +105,13 @@ public class ExcelSynThread implements Runnable {
 
                 logger.info("上传文件id为[{}]的excel总记录数为：{}", sysFilePath.getId(), dataList.size());
                 long begin = System.currentTimeMillis();
-                List<String> newDataList = new ArrayList<>(dataList.size());
-                List<String> failDataList = new ArrayList<>();
+                List<String[]> newDataList = new ArrayList<>(dataList.size());
+                List<String[]> failDataList = new ArrayList<>();
 
                 List<Integer> columnIndexList = new ArrayList<>();
 
                 //去除多余不符合条件的数据
-                for (String data : dataList) {
+                for (String[] data : dataList) {
                     if (validateExcelColumn(data, columnIndexList)) {
                         newDataList.add(data);
                     } else {
@@ -150,19 +150,19 @@ public class ExcelSynThread implements Runnable {
                 List<Map<String, Object>> datas = new ArrayList<>();
                 Map<String, Object> map = null;
                 for (int i = 0; i < handleNum; i++) {
-                    List<String> subList = null;
+                    List<String[]> subList = null;
                     if (i == handleNum - 1) {
                         subList = newDataList.subList(i * num, size);
                     } else {
                         subList = newDataList.subList(i * num, i * num + num);
                     }
 
-                    for (String singleRecord : subList) {
-                        String[] eColumArr = singleRecord.split(",", -1);
+                    for (String[] singleRecord : subList) {
+//                        String[] eColumArr = singleRecord.split(",", -1);
                         map = new HashMap<>();
                         for (Integer columnIndex : columnIndexList) {
                             //解析数据为对应的类型
-                            Object o = parseDataType(columnIndex, eColumArr[columnIndex]);
+                            Object o = parseDataType(columnIndex, singleRecord[columnIndex]);
                             map.put(columnIndexToEnameMap.get(columnIndex), o);
                         }
                         datas.add(map);
@@ -260,9 +260,9 @@ public class ExcelSynThread implements Runnable {
      * @Description: 单条记录正则校验
      * @Date: 17:02 2018/4/16
      */
-    private boolean validateExcelColumn(String singleRecord, List<Integer> columnIndexList) throws ServiceException {
-        String[] eColumArr = singleRecord.split(",", -1);
-        for (int i = 0; i < eColumArr.length; i++) {
+    private boolean validateExcelColumn(String[] singleRecord, List<Integer> columnIndexList) throws ServiceException {
+//        String[] eColumArr = singleRecord.split(",", -1);
+        for (int i = 0; i < singleRecord.length; i++) {
 
             //如果excel的列是不会导入的数据，不进行后续的判断
             if (!columnIndexList.contains(i)) {
@@ -281,14 +281,14 @@ public class ExcelSynThread implements Runnable {
 
                 String dataType = columnIndexToDataFieldTypeMap.get(i);
                 //根据不同的数据类型进行判断
-                if (!validateDataType(dataType, eColumArr[i])) {
+                if (!validateDataType(dataType, singleRecord[i])) {
                     return false;
                 }
 
             } else {//正则存在
 
                 //有一个验证不通过，返回false
-                if (!RegexUtils.validate(eColumArr[i], regex)) {
+                if (!RegexUtils.validate(singleRecord[i], regex)) {
                     return false;
                 }
             }
