@@ -298,7 +298,7 @@ public class GenDBUtils {
     /**
      * @return
      * @Author: MR LIS
-     * @Description: 根据数据库连接+库名 得到对应的所有表记录求和总记录数
+     * @Description: 根据数据库连接+库名 判断该表是否存在
      * @Date: 9:43 2018/5/30
      */
     public static int getIsTableExistCount(DataBaseConfig dataBaseConfig, String tableName) {
