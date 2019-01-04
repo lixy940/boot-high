@@ -158,7 +158,7 @@ public class FtpUtil {
             }
             //创建目录
             if (!ftpClient.changeWorkingDirectory(ftpAtt.getPath())){
-                ftpClient.makeDirectory(ftpAtt.getPath());
+                createDirectory(ftpAtt.getPath());
             }
             ftpClient.changeWorkingDirectory(ftpAtt.getPath());
             ftpClient.appendFile(remoteFileName, input);
