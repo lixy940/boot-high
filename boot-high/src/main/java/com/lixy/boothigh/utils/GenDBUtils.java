@@ -557,7 +557,7 @@ public class GenDBUtils {
             querySql = "select * from (select T.*,ROWNUM RN from " + tableName + "  T where ROWNUM <= " + end + ") where RN >" + start;
 
         } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equalsIgnoreCase(dbType)) {
-            querySql = "select * from " + tableSchema + "." + tableName + " limit " + size + " offset  " + start;
+            querySql = "select * from " + tableSchema + "." + tableName + " order by 1 limit " + size + " offset  " + start;
 
         }
 
@@ -567,7 +567,7 @@ public class GenDBUtils {
     /**
      * @return
      * @Author: MR LIS
-     * @Description: 分页sql
+     * @Description: 带条件分页sql
      * @Date: 9:56 2018/5/25
      */
     public static String pagingSqlWithCondition(String dbType, String tableName, List<ConditionVo> conditionVos, String tableSchema, Integer size, Integer start, Integer end) {
@@ -587,7 +587,7 @@ public class GenDBUtils {
             }
 
         } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equalsIgnoreCase(dbType)) {
-            querySql = "select * from " + tableSchema + "." + tableName +conditionSql+ " limit " + size + " offset  " + start;
+            querySql = "select * from " + tableSchema + "." + tableName +conditionSql+ " order by 1 limit " + size + " offset  " + start;
 
         }
         return querySql;
@@ -633,7 +633,7 @@ public class GenDBUtils {
             querySql = "select " + columnArrStr + " from (select T.*,ROWNUM RN from " + tableName + "  T where ROWNUM <= " + end + ") where RN >" + start;
 
         } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equalsIgnoreCase(dbType)) {
-            querySql = "select " + columnArrStr + " from " + tableSchema + "." + tableName + " limit " + size + " offset  " + start;
+            querySql = "select " + columnArrStr + " from " + tableSchema + "." + tableName + " order by 1 limit " + size + " offset  " + start;
 
         }
 
