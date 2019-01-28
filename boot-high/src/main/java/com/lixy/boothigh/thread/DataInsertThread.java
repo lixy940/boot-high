@@ -125,7 +125,7 @@ public class DataInsertThread  implements Callable<Integer> {
         logger.info("正在执行插入，请稍后............");
         Connection conn = null;
         PreparedStatement pstm = null;
-        /*Integer dbId =Integer.parseInt(DBPropertyReaderUtils.getProValue("tidb.db.id"))
+        /*Integer dbId =Integer.parseInt(PropertyReaderUtils.getProValue("tidb.db.id"))
         SysDBInfo sysDBInfo = sysDBInfoMapper.selectByPrimaryKey(dbId);*/
 
         try {
