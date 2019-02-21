@@ -20,7 +20,7 @@ import java.util.UUID;
 
 /**
  * @Author: MR LIS
- * @Description:
+ * @Description:http://localhost:8080/swagger-ui.html
  * @Date: Create in 12:35 2018/4/10
  * @Modified By:
  */

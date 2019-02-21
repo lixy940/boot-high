@@ -5,6 +5,7 @@ package com.lixy.boothigh.runner;
 import com.lixy.boothigh.service.RedisService;
 import com.lixy.boothigh.thread.ExcelSynThread;
 import com.lixy.boothigh.thread.MonitorTaskHandlerThread;
+import com.lixy.boothigh.utils.PropertyReaderUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,8 @@ public class InitStartUp implements CommandLineRunner {
 	private ExcelSynThread excelSynThread;
     @Autowired
     private MonitorTaskHandlerThread handlerThread;
+
+	public static final int serverId = new Integer(PropertyReaderUtils.getInstance().getProValue("quartz.config.server.id"));
 	@Override
 	public void run(String... args){
 		logger.info(this.getClass().getName() + "启动加载数据********");
