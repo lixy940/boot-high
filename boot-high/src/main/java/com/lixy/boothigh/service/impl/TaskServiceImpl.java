@@ -33,13 +33,13 @@ public class TaskServiceImpl implements TaskService {
         String dataId = "数据主键";
         //放入计划任务中
         Map<String, Object> params = new HashMap<>();
-        params.put("taskId", taskId);
+        params.put("dataId", dataId);
         quartzUtils.addJob(JOB_NAME_PREFIX+dataId,GROUP_NAME, cron, MissionJobImpl.class, params);
     }
 
     @Override
-    public void syncData(Integer taskId) {
+    public void syncData(Integer dataId) {
        //执行逻辑........
-        logger.info("处理{}的逻辑", taskId);
+        logger.info("处理{}的逻辑", dataId);
     }
 }

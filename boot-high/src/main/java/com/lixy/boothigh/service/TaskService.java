@@ -12,7 +12,7 @@ public interface TaskService {
 
     /**
      * 更加任务id,同步对应的数据
-     * @param taskId
+     * @param dataId
      */
-    void syncData(Integer taskId);
+    void syncData(Integer dataId);
 }
