@@ -159,3 +159,5 @@
 ####设置post请求头大小
 server.max-http-header-size=10000000    
     
+####增加quartz定时计划任务工具类及调用实例
+将计划任务存入数据库表中，初始化数据库表‘quartz初始化数据库.sql’    
