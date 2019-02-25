@@ -50,7 +50,7 @@ public class WebSocketController {
     public void receive1(){
         String message = "上传任务完成了！|用户1";
         //服务器发送消息到客户端
-        socketTest.sendToUser(message);
+        socketTest.sendMessage(message);
     }
 
     @RequestMapping("/receive2")
@@ -58,6 +58,6 @@ public class WebSocketController {
     public void receive2(){
         String message = "上传任务完成了！|用户2";
         //服务器发送消息到客户端
-        socketTest.sendToUser(message);
+        socketTest.sendMessage(message);
     }
 }
