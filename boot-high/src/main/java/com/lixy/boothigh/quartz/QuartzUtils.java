@@ -19,6 +19,7 @@ import java.util.Set;
  * Job和Trigger的key（JobKey和TriggerKey）可以用于将Job和Trigger放到不同的分组（group）里，然后基于分组进行操作。
  * 同一个分组下的Job或Trigger的名称必须唯一，即一个Job或Trigger的key由名称（name）和分组（group）组成。
  * 如果group为null,默认为放到DEFAULT_GROUP=DEFAULT组里
+ * 使用手册:https://www.w3cschool.cn/quartz_doc/
  */
 @Component
 public class QuartzUtils {
