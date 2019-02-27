@@ -2,7 +2,7 @@ package com.lixy.boothigh.websocket;
 
 /**
  * @Author: MR LIS
- * @Description:
+ * @Description:前端或客户端通过 ws://ip:端口/webSocket/uniqueKey进行访问
  * @Date: Create in 10:02 2018/6/21
  * @Modified By:
  */
