@@ -109,7 +109,7 @@ public class HttpClientUtils {
      * @date 2018/8/17
      */
     public static FutureWrapper<String> postAsync(String url, Map<String, String> reqParams, String reqBody) {
-        Future<String> future = ThreadPoolUtils.IO_THREAD_POOL.submit(() -> post(url, reqParams, reqBody));
+        FutureWrapper<String> future = ThreadPoolUtils.submitToIoPool(() -> post(url, reqParams, reqBody));
         return new FutureWrapper<>(future);
     }
 

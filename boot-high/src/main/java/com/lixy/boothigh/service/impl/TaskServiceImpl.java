@@ -3,6 +3,7 @@ package com.lixy.boothigh.service.impl;
 import com.lixy.boothigh.quartz.QuartzUtils;
 import com.lixy.boothigh.quartz.job.MissionJobImpl;
 import com.lixy.boothigh.service.TaskService;
+import com.lixy.boothigh.utils.ThreadPoolUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,5 +42,15 @@ public class TaskServiceImpl implements TaskService {
     public void syncData(Integer dataId) {
        //执行逻辑........
         logger.info("处理{}的逻辑", dataId);
+        //线程池的使用
+        ThreadPoolUtils.executeByIoPool(() -> loadData(dataId));
+    }
+
+    /**
+     * 只为线程池测试使用而写方法
+     * @param dataId
+     */
+    private void loadData(Integer dataId){
+        //.............
     }
 }
