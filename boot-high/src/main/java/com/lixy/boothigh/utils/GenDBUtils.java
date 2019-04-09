@@ -1,5 +1,4 @@
 package com.lixy.boothigh.utils;
-
 import com.lixy.boothigh.bean.DataBaseConfig;
 import com.lixy.boothigh.enums.DBTypeEnum;
 import com.lixy.boothigh.enums.DbDataTypeEnum;
@@ -30,19 +29,19 @@ public class GenDBUtils {
     /**
      * MYSQL前缀
      */
-    private static String MYSQL_PREFIX = "jdbc:mysql://";
+    public static String MYSQL_PREFIX = "jdbc:mysql://";
     /**
      * MYSQL后缀
      */
-    private static String MYSQL_SUFFIX = "?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai";
+    public static String MYSQL_SUFFIX = "?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai";
     /**
      * ORACLE前缀
      */
-    private static String ORACLE_PREFIX = "jdbc:oracle:thin:@//";
+    public static String ORACLE_PREFIX = "jdbc:oracle:thin:@//";
     /**
      * postgres前缀
      */
-    private static String POSTGRES_PREFIX = "jdbc:postgresql://";
+    public static String POSTGRES_PREFIX = "jdbc:postgresql://";
 
     /**
      * mysql查询列信息语句前缀
@@ -113,7 +112,7 @@ public class GenDBUtils {
     /**
      * mysql判断指定模式下对应表的个数
      */
-    private static String TABLE_IS_EXIST_MYSQL_PREFIX ="SELECT count(0) as total_count FROM information_schema.TABLES WHERE table_name = ";
+    private static String TABLE_IS_EXIST_MYSQL_PREFIX = "SELECT count(0) as total_count FROM information_schema.TABLES WHERE table_name = ";
     /**
      * oracle、库对应库对应的所有表sql，oracle也是后面跟库名
      */
@@ -202,28 +201,28 @@ public class GenDBUtils {
 
 
     /**
-     * @param dataBaseConfig 数据库连接配置对象
-     * @param tableName      表名
+     * @param dbConfig 数据库连接配置对象
+     * @param tableName 表名
      * @return
      * @Author: MR LIS
      * @Description:获取数据库表的字段名、注释、数据类型
      * @Date: 17:45 2018/5/24
      */
-    public static List<ColumnInfoVO> getAllColumnInfo(DataBaseConfig dataBaseConfig, String tableName) {
+    public static List<ColumnInfoVO> getAllColumnInfo(DataBaseConfig dbConfig, String tableName) {
         List<ColumnInfoVO> voList = new ArrayList<>();
-        Connection conn = getConnection(dataBaseConfig);
+        Connection conn = getConnection(dbConfig);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = conn.prepareStatement(getColumnPropertySQL(dataBaseConfig, tableName));
+            stmt = conn.prepareStatement(getColumnPropertySQL(dbConfig, tableName));
             rs = stmt.executeQuery();
             ColumnInfoVO infoVO = null;
             while (rs.next()) {
-                if (DBTypeEnum.DB_MYSQL.getDbName().equals(dataBaseConfig.getDbType()) || DBTypeEnum.DB_TIDB.getDbName().equals(dataBaseConfig.getDbType())) {
+                if (DBTypeEnum.DB_MYSQL.getDbName().equals(dbConfig.getDbType()) || DBTypeEnum.DB_TIDB.getDbName().equals(dbConfig.getDbType())) {
                     infoVO = new ColumnInfoVO(rs.getString(MYSQL_COLUMN_NAME), rs.getString(MYSQL_COLUMN_COMMENT) == null ? "" : rs.getString(MYSQL_COLUMN_COMMENT), convertDataType(rs.getString(MYSQL_COLUMN_TYPE)));
-                } else if (DBTypeEnum.DB_ORACLE.getDbName().equals(dataBaseConfig.getDbType())) {
+                } else if (DBTypeEnum.DB_ORACLE.getDbName().equals(dbConfig.getDbType())) {
                     infoVO = new ColumnInfoVO(rs.getString(ORACLE_COLUMN_NAME), rs.getString(ORACLE_COLUMN_COMMENT) == null ? "" : rs.getString(ORACLE_COLUMN_COMMENT), convertDataType(rs.getString(ORACLE_COLUMN_TYPE)));
-                } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equals(dataBaseConfig.getDbType())) {
+                } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equals(dbConfig.getDbType())) {
                     infoVO = new ColumnInfoVO(rs.getString(POSTGRES_COLUMN_NAME), rs.getString(POSTGRES_COLUMN_COMMENT) == null ? "" : rs.getString(POSTGRES_COLUMN_COMMENT), convertDataType(rs.getString(POSTGRES_COLUMN_TYPE)));
                 }
                 voList.add(infoVO);
@@ -251,10 +250,10 @@ public class GenDBUtils {
     /**
      * 获取连接对象
      *
-     * @param dataBaseConfig
+     * @param dbConfig
      * @return
      */
-    public synchronized static Connection getConnection(DataBaseConfig dataBaseConfig) {
+    public synchronized static Connection getConnection(DataBaseConfig dbConfig) {
         Connection conn = null;
         //判断当前被创建的连接个数是否大于等于最大数量
         while (createCounter.get() >= activeSize.get()) {
@@ -266,18 +265,18 @@ public class GenDBUtils {
             }
         }
         try {
-            if (DBTypeEnum.DB_MYSQL.getDbName().equals(dataBaseConfig.getDbType()) || DBTypeEnum.DB_TIDB.getDbName().equals(dataBaseConfig.getDbType())) {
+            if (DBTypeEnum.DB_MYSQL.getDbName().equals(dbConfig.getDbType()) || DBTypeEnum.DB_TIDB.getDbName().equals(dbConfig.getDbType())) {
                 Class.forName(DriverNameEnum.DRIVER_MYSQL.getDriverName());
-                String url = MYSQL_PREFIX + dataBaseConfig.getDbIp() + ":" + dataBaseConfig.getDbPort() + "/" + dataBaseConfig.getDbServerName() + MYSQL_SUFFIX;
-                conn = DriverManager.getConnection(url, dataBaseConfig.getDbUser(), dataBaseConfig.getDbPassword());
-            } else if (DBTypeEnum.DB_ORACLE.getDbName().equals(dataBaseConfig.getDbType())) {
+                String url = MYSQL_PREFIX + dbConfig.getDbIp() + ":" + dbConfig.getDbPort() + "/" + dbConfig.getDbServerName() + MYSQL_SUFFIX;
+                conn = DriverManager.getConnection(url, dbConfig.getDbUser(), dbConfig.getDbPassword());
+            } else if (DBTypeEnum.DB_ORACLE.getDbName().equals(dbConfig.getDbType())) {
                 Class.forName(DriverNameEnum.DRIVER_ORACLE.getDriverName());
-                String url = ORACLE_PREFIX + dataBaseConfig.getDbIp() + ":" + dataBaseConfig.getDbPort() + "/" + dataBaseConfig.getDbServerName();
-                conn = DriverManager.getConnection(url, dataBaseConfig.getDbUser(), dataBaseConfig.getDbPassword());
-            } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equals(dataBaseConfig.getDbType())) {
+                String url = ORACLE_PREFIX + dbConfig.getDbIp() + ":" + dbConfig.getDbPort() + "/" + dbConfig.getDbServerName();
+                conn = DriverManager.getConnection(url, dbConfig.getDbUser(), dbConfig.getDbPassword());
+            } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equals(dbConfig.getDbType())) {
                 Class.forName(DriverNameEnum.DRIVER_POSTGRES.getDriverName());
-                String url = POSTGRES_PREFIX + dataBaseConfig.getDbIp() + ":" + dataBaseConfig.getDbPort() + "/" + dataBaseConfig.getDbServerName();
-                conn = DriverManager.getConnection(url, dataBaseConfig.getDbUser(), dataBaseConfig.getDbPassword());
+                String url = POSTGRES_PREFIX + dbConfig.getDbIp() + ":" + dbConfig.getDbPort() + "/" + dbConfig.getDbServerName();
+                conn = DriverManager.getConnection(url, dbConfig.getDbUser(), dbConfig.getDbPassword());
             }
             /**
              * 连接数增加1
@@ -298,17 +297,17 @@ public class GenDBUtils {
     /**
      * @return
      * @Author: MR LIS
-     * @Description: 根据数据库连接+库名 判断该表是否存在
+     * @Description: 根据数据库连接+库名 判断表的个数
      * @Date: 9:43 2018/5/30
      */
-    public static int getIsTableExistCount(DataBaseConfig dataBaseConfig, String tableName) {
+    public static int getIsTableExistCount(DataBaseConfig dbConfig, String tableName) {
 
-        Connection conn = getConnection(dataBaseConfig);
+        Connection conn = getConnection(dbConfig);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         int totalCount = 0;
         try {
-            stmt = conn.prepareStatement(getIsTableExistSQL(dataBaseConfig, tableName));
+            stmt = conn.prepareStatement(getIsTableExistSQL(dbConfig, tableName));
             rs = stmt.executeQuery();
             while (rs.next()) {
                 totalCount = rs.getInt(TABLE_TOTAL_COUNT);
@@ -327,18 +326,18 @@ public class GenDBUtils {
     /**
      * 获取列的属性信息的sql拼接
      *
-     * @param dataBaseConfig
+     * @param dbConfig
      * @param tableName
      * @return
      */
-    private static String getColumnPropertySQL(DataBaseConfig dataBaseConfig,String tableName) {
+    private static String getColumnPropertySQL(DataBaseConfig dbConfig, String tableName) {
         String sql = "";
-        if (DBTypeEnum.DB_MYSQL.getDbName().equals(dataBaseConfig.getDbType()) || DBTypeEnum.DB_TIDB.getDbName().equals(dataBaseConfig.getDbType())) {
+        if (DBTypeEnum.DB_MYSQL.getDbName().equals(dbConfig.getDbType()) || DBTypeEnum.DB_TIDB.getDbName().equals(dbConfig.getDbType())) {
             sql = COLUMN_MYSQL_PREFIX + tableName;
-        } else if (DBTypeEnum.DB_ORACLE.getDbName().equals(dataBaseConfig.getDbType())) {
+        } else if (DBTypeEnum.DB_ORACLE.getDbName().equals(dbConfig.getDbType())) {
             sql = COLUMN_ORACLE_PREFIX + "'" + tableName + "'";
-        } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equals(dataBaseConfig.getDbType())) {
-            sql = COLUMN_POSTGRES_PREFIX + "'" + tableName + "'" + " AND B.nspname = '" + dataBaseConfig.getDbTableSchema() + "'"+" AND C.relkind = '"+dataBaseConfig.getDbRelkind()+"'";
+        } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equals(dbConfig.getDbType())) {
+            sql = COLUMN_POSTGRES_PREFIX + "'" + tableName + "'" + " AND B.nspname = '" + dbConfig.getDbTableSchema() + "'" + " AND C.relkind = '" + dbConfig.getDbRelkind() + "'";
         }
         return sql;
     }
@@ -348,14 +347,14 @@ public class GenDBUtils {
      *
      * @return
      */
-    private static String getIsTableExistSQL(DataBaseConfig dataBaseConfig,String tableName) {
+    private static String getIsTableExistSQL(DataBaseConfig dbConfig, String tableName) {
         String sql = "";
-        if (DBTypeEnum.DB_MYSQL.getDbName().equals(dataBaseConfig.getDbType()) || DBTypeEnum.DB_TIDB.getDbName().equals(dataBaseConfig.getDbType())) {
+        if (DBTypeEnum.DB_MYSQL.getDbName().equals(dbConfig.getDbType()) || DBTypeEnum.DB_TIDB.getDbName().equals(dbConfig.getDbType())) {
             sql = TABLE_IS_EXIST_MYSQL_PREFIX + "'" + tableName + "'";
-        } else if (DBTypeEnum.DB_ORACLE.getDbName().equals(dataBaseConfig.getDbType())) {
+        } else if (DBTypeEnum.DB_ORACLE.getDbName().equals(dbConfig.getDbType())) {
             sql = TABLE_IS_EXIST_ORACLE_PREFIX + "'" + tableName + "'";
-        } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equals(dataBaseConfig.getDbType())) {
-            sql = TABLE_IS_EXIST_POSTGRES_PREFIX + "'" + dataBaseConfig.getDbTableSchema() + "'" + " AND r.relname = '" + tableName + "'"+" AND r.relkind = '"+dataBaseConfig.getDbRelkind()+"'";
+        } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equals(dbConfig.getDbType())) {
+            sql = TABLE_IS_EXIST_POSTGRES_PREFIX + "'" + dbConfig.getDbTableSchema() + "'" + " AND r.relname = '" + tableName + "'" + " AND r.relkind = '" + dbConfig.getDbRelkind() + "'";
         }
         return sql;
     }
@@ -366,8 +365,11 @@ public class GenDBUtils {
      * @Description: 查询分页总记录数
      * @Date: 10:05 2018/5/25
      */
-    public static int executePageTotalCount(DataBaseConfig dataBaseConfig, String tableName) {
-        return queryPageTotalCount(dataBaseConfig, pagingCountSql(dataBaseConfig.getDbType(), tableName, dataBaseConfig.getDbTableSchema()));
+    public static int executePageTotalCount(DataBaseConfig dbConfig, String tableName) {
+        if (Objects.isNull(dbConfig)){
+            return 0;
+        }
+        return queryPageTotalCount(dbConfig, pagingCountSql(dbConfig.getDbType(), tableName, dbConfig.getDbTableSchema()));
     }
 
     /**
@@ -376,18 +378,19 @@ public class GenDBUtils {
      * @Description: 查询分页总记录数
      * @Date: 10:05 2018/12/14
      */
-    public static int executePageTotalCountWithCondition(DataBaseConfig dataBaseConfig, String tableName,List<ConditionVo> conditionVos) {
-        return queryPageTotalCount(dataBaseConfig, pagingCountSqlWithCondition(dataBaseConfig.getDbType(), tableName, dataBaseConfig.getDbTableSchema(),conditionVos));
+    public static int executePageTotalCountWithCondition(DataBaseConfig dbConfig, String tableName, List<ConditionVo> conditionVos) {
+        return queryPageTotalCount(dbConfig, pagingCountSqlWithCondition(dbConfig.getDbType(), tableName, dbConfig.getDbTableSchema(), conditionVos));
     }
+
     /**
      * @return
      * @Author: MR LIS
      * @Description: 查询总记录数
      * @Date: 10:05 2018/5/25
      */
-    public static int queryPageTotalCount(DataBaseConfig dataBaseConfig, String countSql) {
+    public static int queryPageTotalCount(DataBaseConfig dbConfig, String countSql) {
         //查询总记录数
-        Connection conn = getConnection(dataBaseConfig);
+        Connection conn = getConnection(dbConfig);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         int count = 0;
@@ -398,7 +401,7 @@ public class GenDBUtils {
                 count = rs.getInt(1);
             }
         } catch (SQLException e) {
-            logger.error("queryPageTotalCount>>> {}:{}/{},异常:{}", dataBaseConfig.getDbIp(), dataBaseConfig.getDbPort(), dataBaseConfig.getDbServerName(), e.getMessage());
+            logger.error("queryPageTotalCount>>> {}:{}/{},异常:{}", dbConfig.getDbIp(), dbConfig.getDbPort(), dbConfig.getDbServerName(), e.getMessage());
             e.printStackTrace();
         } finally {
             closeConn(conn, stmt, rs);
@@ -413,9 +416,13 @@ public class GenDBUtils {
      * @Description: 查询分页记录结果, 不含总记录数
      * @Date: 10:05 2018/5/25
      */
-    public static List<List<Object>> executePage(DataBaseConfig dataBaseConfig, String tableName, int pageSize, int start, int end) {
+    public static List<List<Object>> executePage(DataBaseConfig dbConfig, String tableName, int pageSize, int start, int end) {
 
-        return executePageRecord(dataBaseConfig, pagingSql(dataBaseConfig.getDbType(), tableName, dataBaseConfig.getDbTableSchema(), pageSize, start, end));
+        return executePageRecord(dbConfig, pagingSql(dbConfig.getDbType(), tableName, dbConfig.getDbTableSchema(), pageSize, start, end));
+    }
+
+    public static List<List<Object>> executePageSpecial(DataBaseConfig dbConfig, String columnArr, String tableName, int pageSize, int start, int end) {
+        return executePageRecord(dbConfig, pagingSqlSpecial(dbConfig.getDbType(), tableName, columnArr,dbConfig.getDbTableSchema(), pageSize, start, end));
     }
 
     /**
@@ -424,20 +431,9 @@ public class GenDBUtils {
      * @Description: 查询带条件分页记录结果, 不含总记录数
      * @Date: 10:05 2018/12/14
      */
-    public static List<List<Object>> executePageWithCondition(DataBaseConfig dataBaseConfig, String tableName, List<ConditionVo> conditionVos, int pageSize, int start, int end) {
-        return executePageRecord(dataBaseConfig, pagingSqlWithCondition(dataBaseConfig.getDbType(), tableName,conditionVos, dataBaseConfig.getDbTableSchema(), pageSize, start, end));
+    public static List<List<Object>> executePageWithCondition(DataBaseConfig dbConfig, String tableName,String columnArr, List<ConditionVo> conditionVos, int pageSize, int start, int end) {
+        return executePageRecord(dbConfig, pagingSqlWithCondition(dbConfig.getDbType(), tableName,columnArr, conditionVos, dbConfig.getDbTableSchema(), pageSize, start, end));
     }
-    /**
-     * @return
-     * @Author: MR LIS
-     * @Description: 查询分页记录结果, 不含总记录数
-     * @Date: 10:05 2018/5/25
-     */
-    public static List<List<Object>> executePage(DataBaseConfig dataBaseConfig, String tableName, String columnArrStr, int pageSize, int start, int end) {
-
-        return executePageRecord(dataBaseConfig, pagingSql(dataBaseConfig.getDbType(), tableName, dataBaseConfig.getDbTableSchema(), columnArrStr, pageSize, start, end));
-    }
-
 
     /**
      * @return
@@ -445,10 +441,22 @@ public class GenDBUtils {
      * @Description: 查询分页记录结果, 不含总记录数
      * @Date: 10:05 2018/5/25
      */
-    public static List<List<Object>> executePageRecord(DataBaseConfig dataBaseConfig, String querySql) {
+    public static List<List<Object>> executePage(DataBaseConfig dbConfig, String tableName, String columnArrStr, int pageSize, int start, int end) {
+
+        return executePageRecord(dbConfig, pagingSql(dbConfig.getDbType(), tableName, dbConfig.getDbTableSchema(), columnArrStr, pageSize, start, end));
+    }
+
+
+    /**
+     * @return
+     * @Author: MR LIS
+     * @Description: 查询分页记录结果, 不含总记录数
+     * @Date: 10:05 2018/5/25
+     */
+    public static List<List<Object>> executePageRecord(DataBaseConfig dbConfig, String querySql) {
         List<List<Object>> listList = new ArrayList<>();
         //查询总记录数
-        Connection conn = getConnection(dataBaseConfig);
+        Connection conn = getConnection(dbConfig);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -457,7 +465,7 @@ public class GenDBUtils {
             rs = stmt.executeQuery();
             ResultSetMetaData data = rs.getMetaData();
             //oracle会多带一列行数回来
-            int rowNum = DBTypeEnum.DB_ORACLE.getDbName().equals(dataBaseConfig.getDbType()) ? data.getColumnCount() - 1 : data.getColumnCount();
+            int rowNum = DBTypeEnum.DB_ORACLE.getDbName().equals(dbConfig.getDbType()) ? data.getColumnCount() - 1 : data.getColumnCount();
             while (rs.next()) {
                 List<Object> objectList = new ArrayList<>();
                 for (int i = 1; i <= rowNum; i++) {
@@ -477,7 +485,7 @@ public class GenDBUtils {
                 listList.add(objectList);
             }
         } catch (SQLException e) {
-            logger.error("executePageRecord>>> {}:{}/{},异常:{}", dataBaseConfig.getDbIp(), dataBaseConfig.getDbPort(), dataBaseConfig.getDbServerName(), e.getMessage());
+            logger.error("executePageRecord>>> {}:{}/{},异常:{}", dbConfig.getDbIp(), dbConfig.getDbPort(), dbConfig.getDbServerName(), e.getMessage());
             e.printStackTrace();
         } finally {
             closeConn(conn, stmt, rs);
@@ -517,20 +525,20 @@ public class GenDBUtils {
      * @Description: 带条件的总记录数sql
      * @Date: 9:56 2018/12/14
      */
-    public static String pagingCountSqlWithCondition(String dbType, String tableName, String tableSchema,List<ConditionVo> conditionVos) {
+    public static String pagingCountSqlWithCondition(String dbType, String tableName, String tableSchema, List<ConditionVo> conditionVos) {
         if (StringUtils.isEmpty(dbType) || StringUtils.isEmpty(tableName)) {
             throw new RuntimeException("sql或者数据库类型不能为空！");
         }
-        String conditionSql =geneConditionSql(conditionVos);
+        String conditionSql = geneConditionSql(conditionVos);
         String countSql = "";
         if (DBTypeEnum.DB_MYSQL.getDbName().equalsIgnoreCase(dbType) || DBTypeEnum.DB_TIDB.getDbName().equals(dbType)) {
-            countSql = "select count(*) as count from " + tableName ;
+            countSql = "select count(*) as count from " + tableName;
 
         } else if (DBTypeEnum.DB_ORACLE.getDbName().equalsIgnoreCase(dbType)) {
-            countSql = "select count(*) as count from " + tableName ;
+            countSql = "select count(*) as count from " + tableName;
 
         } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equalsIgnoreCase(dbType)) {
-            countSql = "select count(*) as count from " + tableSchema + "." + tableName ;
+            countSql = "select count(*) as count from " + tableSchema + "." + tableName;
         }
 
         //加上条件sql
@@ -557,37 +565,60 @@ public class GenDBUtils {
             querySql = "select * from (select T.*,ROWNUM RN from " + tableName + "  T where ROWNUM <= " + end + ") where RN >" + start;
 
         } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equalsIgnoreCase(dbType)) {
-            querySql = "select * from " + tableSchema + "." + tableName + " order by 1 limit " + size + " offset  " + start;
+            querySql = "select * from " + tableSchema + "." + tableName + "  limit " + size + " offset  " + start;
 
         }
+        return querySql;
+    }
 
+    /**
+     * 针对绑定
+     * @Author: MR LIS
+     * @Description: 分页sql
+     * @Date: 9:56 2018/5/25
+     */
+    public static String pagingSqlSpecial(String dbType, String tableName, String columnArr, String tableSchema, Integer size, Integer start, Integer end) {
+        if (StringUtils.isEmpty(dbType) || StringUtils.isEmpty(tableName)) {
+            throw new RuntimeException("sql或者数据库类型不能为空！");
+        }
+        String querySql = "";
+        if (DBTypeEnum.DB_MYSQL.getDbName().equalsIgnoreCase(dbType) || DBTypeEnum.DB_TIDB.getDbName().equals(dbType)) {
+            querySql = "select " + columnArr + " from " + tableName + " limit " + start + "," + size;
+
+        } else if (DBTypeEnum.DB_ORACLE.getDbName().equalsIgnoreCase(dbType)) {
+            querySql = "select " + columnArr + " from (select T.*,ROWNUM RN from " + tableName + "  T where ROWNUM <= " + end + ") where RN >" + start;
+
+        } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equalsIgnoreCase(dbType)) {
+            querySql = "select " + columnArr + " from " + tableSchema + "." + tableName + " where num_id>=" + start + " and num_id <=" + end;
+
+        }
         return querySql;
     }
 
     /**
      * @return
      * @Author: MR LIS
-     * @Description: 带条件分页sql
+     * @Description: 分页sql
      * @Date: 9:56 2018/5/25
      */
-    public static String pagingSqlWithCondition(String dbType, String tableName, List<ConditionVo> conditionVos, String tableSchema, Integer size, Integer start, Integer end) {
+    public static String pagingSqlWithCondition(String dbType, String tableName,String columnArr, List<ConditionVo> conditionVos, String tableSchema, Integer size, Integer start, Integer end) {
         if (StringUtils.isEmpty(dbType) || StringUtils.isEmpty(tableName)) {
             throw new RuntimeException("sql或者数据库类型不能为空！");
         }
         String conditionSql = geneConditionSql(conditionVos);
         String querySql = "";
         if (DBTypeEnum.DB_MYSQL.getDbName().equalsIgnoreCase(dbType) || DBTypeEnum.DB_TIDB.getDbName().equals(dbType)) {
-            querySql = "select * from " + tableName +conditionSql +" limit " + start + "," + size;
+            querySql = "select "+columnArr+" from " + tableName + conditionSql + " limit " + start + "," + size;
 
         } else if (DBTypeEnum.DB_ORACLE.getDbName().equalsIgnoreCase(dbType)) {
-            if(conditionVos.isEmpty()) {
-                querySql = "select * from (select T.*,ROWNUM RN from " + tableName + "  T where ROWNUM <= " + end + ") where RN >" + start;
-            }else {
-                querySql = "select * from (select T.*,ROWNUM RN from " + tableName + "  T " + conditionSql + " and ROWNUM <= " + end + ") where RN >" + start;
+            if (conditionVos.isEmpty()) {
+                querySql = "select "+columnArr+" from (select T.*,ROWNUM RN from " + tableName + "  T where ROWNUM <= " + end + ") where RN >" + start;
+            } else {
+                querySql = "select "+columnArr+" from (select T.*,ROWNUM RN from " + tableName + "  T " + conditionSql + " and ROWNUM <= " + end + ") where RN >" + start;
             }
 
         } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equalsIgnoreCase(dbType)) {
-            querySql = "select * from " + tableSchema + "." + tableName +conditionSql+ " order by 1 limit " + size + " offset  " + start;
+            querySql = "select "+columnArr+" from " + tableSchema + "." + tableName + conditionSql + "  limit " + size + " offset  " + start;
 
         }
         return querySql;
@@ -595,20 +626,21 @@ public class GenDBUtils {
 
     /**
      * 生成条件sql
+     *
      * @param conditionVos
      * @return
      */
     private static String geneConditionSql(List<ConditionVo> conditionVos) {
         String conditionSql = "";
         if (conditionVos != null) {
-            int i=0;
+            int i = 0;
             for (ConditionVo vo : conditionVos) {
                 if (i == 0) {
                     conditionSql += " where ";
-                }else {
+                } else {
                     conditionSql += " and ";
                 }
-                conditionSql += vo.getKey()+"="+"'"+vo.getValue()+"'";
+                conditionSql += vo.getKey() + "=" + "'" + vo.getValue() + "'";
                 i++;
             }
         }
@@ -676,10 +708,11 @@ public class GenDBUtils {
         add("datetime");
         add("time");
         add("timestamp");
-        //oracle数据库
 
     }};
-    //string 集合
+    /**
+     * string 集合
+     */
     private static List<String> stringList = new ArrayList<String>() {{
         //mysql数据库
         add("char");
@@ -728,25 +761,25 @@ public class GenDBUtils {
      * @Description: 根据数据库连接+库名 得到对应的所有表信息
      * @Date: 9:43 2018/5/30
      */
-    public static List<SourceDataInfoShowVO> getDbTableInfos(DataBaseConfig dataBaseConfig) {
+    public static List<SourceDataInfoShowVO> getDbTableInfos(DataBaseConfig dbConfig) {
         List<SourceDataInfoShowVO> showVOs = new ArrayList<>();
-        Connection conn = getConnection(dataBaseConfig);
+        Connection conn = getConnection(dbConfig);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         SourceDataInfoShowVO showVO = null;
         try {
-            stmt = conn.prepareStatement(assembleTableSql(dataBaseConfig));
+            stmt = conn.prepareStatement(assembleTableSql(dbConfig));
             rs = stmt.executeQuery();
             while (rs.next()) {
                 showVO = new SourceDataInfoShowVO();
-                SourceDataInfoVO sourceVO = new SourceDataInfoVO(dataBaseConfig.getDbId(), rs.getString(TABLE_NAME), rs.getString(TABLE_COMMENT) == null ? "" : rs.getString(TABLE_COMMENT), SourceDataTypeEnum.LOCAL.getCode());
+                SourceDataInfoVO sourceVO = new SourceDataInfoVO(dbConfig.getDbId(), rs.getString(TABLE_NAME), rs.getString(TABLE_COMMENT) == null ? "" : rs.getString(TABLE_COMMENT), SourceDataTypeEnum.LOCAL.getCode());
                 showVO.setCount(rs.getLong(TABLE_ROWNUM));
                 showVO.setSourceDataInfoVO(sourceVO);
                 showVOs.add(showVO);
             }
 
         } catch (Exception e) {
-            logger.error("getDbTableInfos>>> {}:{}/{},异常:{}", dataBaseConfig.getDbIp(), dataBaseConfig.getDbPort(), dataBaseConfig.getDbServerName(), e.getMessage());
+            logger.error("getDbTableInfos>>> {}:{}/{},异常:{}", dbConfig.getDbIp(), dbConfig.getDbPort(), dbConfig.getDbServerName(), e.getMessage());
             e.printStackTrace();
         } finally {
             closeConn(conn, stmt, rs);
@@ -760,18 +793,17 @@ public class GenDBUtils {
 
 
     /**
-
      * @return
      * @Author: MR LIS
      * @Description: 拼接获取库对应的所有表信息
      * mysql、oracle根据库名去查找下面所有自己创建的表，postgres根据模式去找，同一个库下的不同模式不要有重复的表,postgres连接时已经制定了库
      * @Date: 9:56 2018/5/30
      */
-    private static String assembleTableSql(DataBaseConfig dataBaseConfig) {
-        if (StringUtils.isEmpty(dataBaseConfig.getDbType())) {
+    private static String assembleTableSql(DataBaseConfig dbConfig) {
+        if (StringUtils.isEmpty(dbConfig.getDbType())) {
             throw new RuntimeException("数据库类型不能为空！");
         }
-        return getAssembleSqlString(dataBaseConfig, TABLE_MYSQL_PREFIX, TABLE_ORACLE_PREFIX, TABLE_POSTGRES_PREFIX);
+        return getAssembleSqlString(dbConfig, TABLE_MYSQL_PREFIX, TABLE_ORACLE_PREFIX, TABLE_POSTGRES_PREFIX);
     }
 
 
@@ -781,14 +813,14 @@ public class GenDBUtils {
      * @Description: 根据数据库连接+库名 得到对应的所有表记录求和总记录数
      * @Date: 9:43 2018/5/30
      */
-    public static int getDbRowTotalCount(DataBaseConfig dataBaseConfig) {
+    public static int getDbRowTotalCount(DataBaseConfig dbConfig) {
 
-        Connection conn = getConnection(dataBaseConfig);
+        Connection conn = getConnection(dbConfig);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         int totalCount = 0;
         try {
-            stmt = conn.prepareStatement(assembleROWCountSql(dataBaseConfig));
+            stmt = conn.prepareStatement(assembleROWCountSql(dbConfig));
             rs = stmt.executeQuery();
             while (rs.next()) {
                 totalCount = rs.getInt(ROW_DB_TOTAL_COUNT);
@@ -812,11 +844,11 @@ public class GenDBUtils {
      * mysql、oracle根据库名去查找下面所有自己创建的表，postgres根据模式去找，同一个库下的不同模式不要有重复的表,postgres连接时已经制定了库
      * @Date: 9:56 2018/5/30
      */
-    private static String assembleROWCountSql(DataBaseConfig dataBaseConfig) {
-        if (StringUtils.isEmpty(dataBaseConfig.getDbType())) {
+    private static String assembleROWCountSql(DataBaseConfig dbConfig) {
+        if (StringUtils.isEmpty(dbConfig.getDbType())) {
             throw new RuntimeException("数据库类型不能为空！");
         }
-        return getAssembleSqlString(dataBaseConfig, ROW_COUNT_MYSQL_PREFIX, ROW_COUNT_ORACLE_PREFIX, ROW_COUNT_POSTGRES_PREFIX);
+        return getAssembleSqlString(dbConfig, ROW_COUNT_MYSQL_PREFIX, ROW_COUNT_ORACLE_PREFIX, ROW_COUNT_POSTGRES_PREFIX);
     }
 
 
@@ -826,12 +858,12 @@ public class GenDBUtils {
      * @Description: 删表操作
      * @Date: 10:15 2018/6/1
      */
-    public static void dropTable(DataBaseConfig dataBaseConfig, String tableName) {
-        Connection conn = getConnection(dataBaseConfig);
+    public static void dropTable(DataBaseConfig dbConfig, String tableName) {
+        Connection conn = getConnection(dbConfig);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = conn.prepareStatement(assembleDropTableSql(dataBaseConfig.getDbType(), tableName, dataBaseConfig.getDbTableSchema()));
+            stmt = conn.prepareStatement(assembleDropTableSql(dbConfig.getDbType(), tableName, dbConfig.getDbTableSchema()));
             stmt.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
@@ -864,21 +896,21 @@ public class GenDBUtils {
      * @Description: 根据数据库连接+库名 得到库对应的表个数
      * @Date: 9:43 2018/5/30
      */
-    public static int getDbTableTotalCount(DataBaseConfig dataBaseConfig) {
+    public static int getDbTableTotalCount(DataBaseConfig dbConfig) {
 
-        Connection conn = getConnection(dataBaseConfig);
+        Connection conn = getConnection(dbConfig);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         int totalCount = 0;
         try {
-            stmt = conn.prepareStatement(assembleTableCountSql(dataBaseConfig));
+            stmt = conn.prepareStatement(assembleTableCountSql(dbConfig));
             rs = stmt.executeQuery();
             while (rs.next()) {
                 totalCount = rs.getInt(TABLE_DB_TOTAL_COUNT);
             }
 
         } catch (Exception e) {
-            logger.error("getDbTableTotalCount>>> {}:{}/{},异常:{}", dataBaseConfig.getDbIp(), dataBaseConfig.getDbPort(), dataBaseConfig.getDbServerName(), e.getMessage());
+            logger.error("getDbTableTotalCount>>> {}:{}/{},异常:{}", dbConfig.getDbIp(), dbConfig.getDbPort(), dbConfig.getDbServerName(), e.getMessage());
             e.printStackTrace();
         } finally {
             closeConn(conn, stmt, rs);
@@ -895,46 +927,49 @@ public class GenDBUtils {
      * mysql、oracle根据库名去查找下面所有自己创建的表，postgres根据模式去找，同一个库下的不同模式不要有重复的表,postgres连接时已经制定了库
      * @Date: 9:56 2018/5/30
      */
-    private static String assembleTableCountSql(DataBaseConfig dataBaseConfig) {
-        if (StringUtils.isEmpty(dataBaseConfig.getDbType())) {
+    private static String assembleTableCountSql(DataBaseConfig dbConfig) {
+        if (StringUtils.isEmpty(dbConfig.getDbType())) {
             throw new RuntimeException("数据库类型不能为空！");
         }
-        return getAssembleCountSql(dataBaseConfig, TABLE_COUNT_MYSQL_PREFIX, TABLE_COUNT_ORACLE_PREFIX, TABLE_COUNT_POSTGRES_PREFIX);
+        return getAssembleCountSql(dbConfig, TABLE_COUNT_MYSQL_PREFIX, TABLE_COUNT_ORACLE_PREFIX, TABLE_COUNT_POSTGRES_PREFIX);
     }
 
     /**
      * 拼接公共部分
+     *
      * @param mysqlPrefix
      * @param oraclePrefix
      * @param postgresPrefix
      * @return
      */
-    private static String getAssembleCountSql(DataBaseConfig dataBaseConfig, String mysqlPrefix, String oraclePrefix, String postgresPrefix) {
+    private static String getAssembleCountSql(DataBaseConfig dbConfig, String mysqlPrefix, String oraclePrefix, String postgresPrefix) {
         String countSql = "";
-        if (DBTypeEnum.DB_MYSQL.getDbName().equalsIgnoreCase(dataBaseConfig.getDbType()) || DBTypeEnum.DB_TIDB.getDbName().equals(dataBaseConfig.getDbType())) {
-            countSql = mysqlPrefix + "'" + dataBaseConfig.getDbServerName() + "'";
-        } else if (DBTypeEnum.DB_ORACLE.getDbName().equalsIgnoreCase(dataBaseConfig.getDbType())) {
-            countSql = oraclePrefix + "'" + dataBaseConfig.getDbServerName() + "'";
-        } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equalsIgnoreCase(dataBaseConfig.getDbType())) {
-            countSql = postgresPrefix + "'" + dataBaseConfig.getDbTableSchema()+"'";
+        if (DBTypeEnum.DB_MYSQL.getDbName().equalsIgnoreCase(dbConfig.getDbType()) || DBTypeEnum.DB_TIDB.getDbName().equals(dbConfig.getDbType())) {
+            countSql = mysqlPrefix + "'" + dbConfig.getDbServerName() + "'";
+        } else if (DBTypeEnum.DB_ORACLE.getDbName().equalsIgnoreCase(dbConfig.getDbType())) {
+            countSql = oraclePrefix + "'" + dbConfig.getDbServerName() + "'";
+        } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equalsIgnoreCase(dbConfig.getDbType())) {
+            countSql = postgresPrefix + "'" + dbConfig.getDbTableSchema() + "'";
         }
         return countSql;
     }
+
     /**
      * 拼接公共部分
+     *
      * @param mysqlPrefix
      * @param oraclePrefix
      * @param postgresPrefix
      * @return
      */
-    private static String getAssembleSqlString(DataBaseConfig dataBaseConfig, String mysqlPrefix, String oraclePrefix, String postgresPrefix) {
+    private static String getAssembleSqlString(DataBaseConfig dbConfig, String mysqlPrefix, String oraclePrefix, String postgresPrefix) {
         String countSql = "";
-        if (DBTypeEnum.DB_MYSQL.getDbName().equalsIgnoreCase(dataBaseConfig.getDbType()) || DBTypeEnum.DB_TIDB.getDbName().equals(dataBaseConfig.getDbType())) {
-            countSql = mysqlPrefix + "'" + dataBaseConfig.getDbServerName() + "'";
-        } else if (DBTypeEnum.DB_ORACLE.getDbName().equalsIgnoreCase(dataBaseConfig.getDbType())) {
-            countSql = oraclePrefix + "'" + dataBaseConfig.getDbServerName() + "'";
-        } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equalsIgnoreCase(dataBaseConfig.getDbType())) {
-            countSql = postgresPrefix + "'" + dataBaseConfig.getDbTableSchema() + "'"+" AND r.relkind = '"+dataBaseConfig.getDbRelkind()+"'";
+        if (DBTypeEnum.DB_MYSQL.getDbName().equalsIgnoreCase(dbConfig.getDbType()) || DBTypeEnum.DB_TIDB.getDbName().equals(dbConfig.getDbType())) {
+            countSql = mysqlPrefix + "'" + dbConfig.getDbServerName() + "'";
+        } else if (DBTypeEnum.DB_ORACLE.getDbName().equalsIgnoreCase(dbConfig.getDbType())) {
+            countSql = oraclePrefix + "'" + dbConfig.getDbServerName() + "'";
+        } else if (DBTypeEnum.DB_POSTGRESQL.getDbName().equalsIgnoreCase(dbConfig.getDbType())) {
+            countSql = postgresPrefix + "'" + dbConfig.getDbTableSchema() + "'" + " AND r.relkind = '" + dbConfig.getDbRelkind() + "'";
         }
         return countSql;
     }
@@ -978,4 +1013,24 @@ public class GenDBUtils {
         }
     }
 
+    /**
+     * 根据postgresql的模式和表名进行表清理
+     *
+     * @param dbConfig
+     * @param tableEname
+     */
+    public static void vacuumPostgrepTable(DataBaseConfig dbConfig, String tableEname) {
+        Connection conn = getConnection(dbConfig);
+        PreparedStatement stmt = null;
+        try {
+            stmt = conn.prepareStatement("vacuum " + dbConfig.getDbTableSchema() + "." + tableEname);
+            stmt.executeUpdate();
+
+        } catch (Exception e) {
+            logger.error("vacuumPostgrepTable>>> {}:{}/{},异常:{}", dbConfig.getDbIp(), dbConfig.getDbPort(), dbConfig.getDbServerName(), e.getMessage());
+            e.printStackTrace();
+        } finally {
+            closeConn(conn, stmt, null);
+        }
+    }
 }

@@ -13,12 +13,14 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Author: MR LIS
@@ -127,8 +129,10 @@ public class GenCommonController {
     public JsonResult executePageNotCount(@PathVariable("dbId") Integer dbId, @PathVariable("tableName") String tableName, @PathVariable("pageNum") Integer pageNum, @PathVariable("pageSize") Integer pageSize) {
         JsonResult jsonResult = new JsonResult();
         try {
-
-            List<List<Object>> dataList = genCommonService.executePageQueryNotCount(dbId, tableName, pageNum, pageSize);
+            List<ColumnInfoVO> allColumnInfo = genCommonService.getAllColumnInfo(dbId, tableName);
+            List<String> collect = allColumnInfo.stream().map(o -> o.getColumnEname()).collect(Collectors.toList());
+            String columnArr = StringUtils.join(collect, ",");
+            List<List<Object>> dataList = genCommonService.executePageQueryColumnRecord(dbId, tableName,columnArr, pageNum, pageSize);
             jsonResult.setData(dataList);
 
         } catch (ServiceException e) {
@@ -178,8 +182,10 @@ public class GenCommonController {
     public JsonResult executePageNotCountWithCondition(@RequestBody ConditionPageVo pageVo) {
         JsonResult responseResult = new JsonResult();
         try {
-
-            List<List<Object>> dataList = genCommonService.executePageQueryNotCountWithCondition(pageVo);
+            List<ColumnInfoVO> allColumnInfo = genCommonService.getAllColumnInfo(pageVo.getDbId(), pageVo.getTableName());
+            List<String> collect = allColumnInfo.stream().map(o -> o.getColumnEname()).collect(Collectors.toList());
+            String columnArr = StringUtils.join(collect, ",");
+            List<List<Object>> dataList = genCommonService.executePageQueryNotCountWithCondition(pageVo,columnArr);
             responseResult.setData(dataList);
 
         } catch (ServiceException e) {
