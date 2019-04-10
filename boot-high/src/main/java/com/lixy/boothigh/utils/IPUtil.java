@@ -5,6 +5,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.net.UnknownHostException;
 import java.util.Enumeration;
 /**
  * @Author: MR LIS
@@ -48,7 +49,20 @@ public class IPUtil {
         return null;
     }
 
+    /**
+     * 获取内网地址
+     * @return
+     */
+    public static String getInnerIp(){
+        try {
+            return InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            log.error("获取内网ip失败", e);
+        }
+        return "";
+    }
+
     public static void main(String[] args){
-        System.out.println(IPUtil.getLocalIP());
+        System.out.println(IPUtil.getInnerIp());
     }
 }
