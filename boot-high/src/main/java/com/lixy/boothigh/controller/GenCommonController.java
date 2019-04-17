@@ -130,7 +130,7 @@ public class GenCommonController {
         JsonResult jsonResult = new JsonResult();
         try {
             List<ColumnInfoVO> allColumnInfo = genCommonService.getAllColumnInfo(dbId, tableName);
-            List<String> collect = allColumnInfo.stream().map(o -> o.getColumnEname()).collect(Collectors.toList());
+            List<String> collect = allColumnInfo.stream().map(o -> "`"+o.getColumnEname()+"`").collect(Collectors.toList());
             String columnArr = StringUtils.join(collect, ",");
             List<List<Object>> dataList = genCommonService.executePageQueryColumnRecord(dbId, tableName,columnArr, pageNum, pageSize);
             jsonResult.setData(dataList);
@@ -183,7 +183,7 @@ public class GenCommonController {
         JsonResult responseResult = new JsonResult();
         try {
             List<ColumnInfoVO> allColumnInfo = genCommonService.getAllColumnInfo(pageVo.getDbId(), pageVo.getTableName());
-            List<String> collect = allColumnInfo.stream().map(o -> o.getColumnEname()).collect(Collectors.toList());
+            List<String> collect = allColumnInfo.stream().map(o -> "`"+o.getColumnEname()+"`").collect(Collectors.toList());
             String columnArr = StringUtils.join(collect, ",");
             List<List<Object>> dataList = genCommonService.executePageQueryNotCountWithCondition(pageVo,columnArr);
             responseResult.setData(dataList);
