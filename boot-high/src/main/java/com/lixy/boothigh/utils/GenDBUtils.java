@@ -134,13 +134,14 @@ public class GenDBUtils {
      * postgres库对应库对应的所有表sql，postgres后面跟模式名称，连接时已经确定了是哪个库
      */
     private static String TABLE_POSTGRES_PREFIX = "SELECT\n" +
-            "r.relname AS table_name,\n" +
-            "cast(obj_description(relfilenode,'pg_class') as varchar) as table_comment ,\n" +
+            "\tr.relname AS TABLE_NAME,\n" +
+            "\t(SELECT obj_description((n.nspname||'.'||r.relname)::regclass, 'pg_class') as table_comment limit 1),\n" +
             "r.reltuples AS row_num\n" +
-            "FROM pg_class r\n" +
+            "FROM\n" +
+            "\tpg_class r\n" +
             "JOIN pg_namespace n ON r.relnamespace = n.oid\n" +
             "WHERE\n" +
-            " n.nspname = ";
+            "\tr.relkind = 'r' AND n.nspname = ";
     /**
      * postgres库对应模式下 对应的所有表记录数求和
      */
