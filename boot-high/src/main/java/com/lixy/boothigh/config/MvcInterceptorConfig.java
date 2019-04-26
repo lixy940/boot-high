@@ -46,7 +46,8 @@ public class MvcInterceptorConfig extends WebMvcConfigurerAdapter{
 
 		//注意对登录拦截的设置，不然无法访问
 		registry.addInterceptor(new LoginInterceptor()).addPathPatterns("/**")
-				.excludePathPatterns("/login/loginRegister", "/import/*", "/aop/*","/test/*","/list","/socktest/*","/permission/*","/quartz/*")
+				.excludePathPatterns("/login/loginRegister", "/import/*", "/aop/*","/test/*","/list","/socktest/*","/permission/*",
+						"/quartz/*","/excep/*")
 				//后面是swagger拦截排除
 				.excludePathPatterns("/swagger-resources/**")
                 .excludePathPatterns("/v2/api-docs")

@@ -1,10 +1,5 @@
 package com.lixy.boothigh.enums;
 
-/**
- * @author YangGuisen
- * @date 2017年6月20日 
- * @version 1.0 
- */
 public enum ResultEnum {
 
     SUCCESS(200),
