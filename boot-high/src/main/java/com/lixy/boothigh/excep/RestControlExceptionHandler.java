@@ -21,7 +21,7 @@ public class RestControlExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(RestControlExceptionHandler.class);
 
     /**
-     * 业务异常
+     * 拦截BussinessException业务异常
      * @param ex
      * @param request
      * @return
