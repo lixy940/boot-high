@@ -12,6 +12,7 @@
 package com.lixy.boothigh.config;
 
 
+import com.lixy.boothigh.constants.BConstant;
 import com.lixy.boothigh.interceptor.JoeInterceptor;
 import com.lixy.boothigh.interceptor.LoginInterceptor;
 import com.lixy.boothigh.interceptor.PermissionInterceptor;
@@ -21,6 +22,8 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+
+import java.io.File;
 
 /**  
  * ClassName:SpringInterceptorRegister 
@@ -64,9 +67,27 @@ public class MvcInterceptorConfig extends WebMvcConfigurerAdapter{
 	 */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/image/**").addResourceLocations("classpath:/image/");
-        registry.addResourceHandler("/picture/**").addResourceLocations("file:D:/picture/");
-        super.addResourceHandlers(registry);
+//        super.addResourceHandlers(registry);
+
+		//和页面有关的静态目录都放在项目的static目录下,例如访问http://localhost:8787/static/football.jpg,访问的是static目录下football.jpg
+		//通过classpath指定resources的相对路径
+		registry.addResourceHandler("/static/**").addResourceLocations("classpath:/static/");
+		//上传的图片在D盘下的photo_header目录下，访问路径如：http://localhost:8081/OTA/d3cf0281-bb7f-40e0-ab77-406db95ccf2c.jpg
+		//其中OTA表示访问的前缀。"file:D:/photo_header"是文件真实的存储路径，file:表示用的磁盘实际路径
+
+		if (System.getProperty(BConstant.SYS_PROPERTY_OS_NAME).toLowerCase().contains(BConstant.SYS_OS_NAME_WINDOW)) {
+			registry.addResourceHandler("/OTA/**").addResourceLocations("file:"+ BConstant.UPLOAD_PIC_WINDOWS);
+			File file = new File(BConstant.UPLOAD_PIC_WINDOWS);
+			if (!file.exists()) {
+				file.mkdirs();
+			}
+		}else{
+			registry.addResourceHandler("/OTA/**").addResourceLocations("file:"+BConstant.UPLOAD_PIC_LINUX);
+			File file = new File(BConstant.UPLOAD_PIC_LINUX);
+			if (!file.exists()) {
+				file.mkdirs();
+			}
+		}
     }
 
 }

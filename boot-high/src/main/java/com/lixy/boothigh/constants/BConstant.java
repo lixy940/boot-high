@@ -85,4 +85,23 @@ public class BConstant {
      * FTP指定目录
      */
     public final static String FTP_DIR = PropertyReaderUtils.getInstance().getProValue("ftp.dir");
+
+    /**
+     * 上传图片存储路径 linux
+     */
+    public final static String UPLOAD_PIC_LINUX = "/opt/app/photo_header/";
+    /**
+     * 上传图片存储路径 windows
+     */
+    public final static String UPLOAD_PIC_WINDOWS = "C:/photo_header/";
+
+    /**
+     * 系统属性名
+     */
+    public final static String SYS_PROPERTY_OS_NAME = "os.name";
+
+    /**
+     * 系统属性包含window
+     */
+    public final static String SYS_OS_NAME_WINDOW = "window";
 }
