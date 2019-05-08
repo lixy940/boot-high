@@ -31,7 +31,7 @@ public class TaskServiceImpl implements TaskService {
         //写死触发器表达式
         String cron = "30 * * * * ? *";
         //根据任务id获取对应的数据id，必须时唯一的,用作计划的name
-        String dataId = "数据主键"+taskId;
+        String dataId = "1111"+taskId;
         //放入计划任务中
         Map<String, Object> params = new HashMap<>();
         params.put("dataId", dataId);
