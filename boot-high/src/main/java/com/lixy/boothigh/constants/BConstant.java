@@ -104,4 +104,13 @@ public class BConstant {
      * 系统属性包含window
      */
     public final static String SYS_OS_NAME_WINDOW = "window";
+
+    /**
+     * tmp  linux
+     */
+    public final static String TMP_LINUX = "/opt/app/data/tmp/";
+    /**
+     * tmp windows
+     */
+    public final static String TMP_WINDOWS = "C:/data/tmp";
 }
