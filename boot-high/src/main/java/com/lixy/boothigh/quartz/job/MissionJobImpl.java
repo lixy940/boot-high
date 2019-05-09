@@ -28,8 +28,10 @@ public class MissionJobImpl implements Job {
     public void execute(JobExecutionContext context) {
         try {
             JobDataMap jobDataMap = context.getJobDetail().getJobDataMap();
-            Integer dataId = (Integer) jobDataMap.get("dataId");
-            taskService.syncData(dataId);
+            if (jobDataMap.get("dataId") != null) {
+                Integer dataId = Integer.valueOf(String.valueOf(jobDataMap.get("dataId")));
+                taskService.syncData(dataId);
+            }
         } catch (Exception e) {
             LOGGER.error("定时任务导入执行失败", e);
         }

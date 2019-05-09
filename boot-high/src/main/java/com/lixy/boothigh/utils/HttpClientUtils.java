@@ -1,6 +1,5 @@
 package com.lixy.boothigh.utils;
 
-import jdk.management.resource.internal.FutureWrapper;
 import okhttp3.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -110,7 +109,7 @@ public class HttpClientUtils {
      */
     public static FutureWrapper<String> postAsync(String url, Map<String, String> reqParams, String reqBody) {
         FutureWrapper<String> future = ThreadPoolUtils.submitToIoPool(() -> post(url, reqParams, reqBody));
-        return new FutureWrapper<>(future);
+        return future;
     }
 
 

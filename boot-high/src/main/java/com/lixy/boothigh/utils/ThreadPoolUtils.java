@@ -1,7 +1,6 @@
 package com.lixy.boothigh.utils;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import jdk.management.resource.internal.FutureWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

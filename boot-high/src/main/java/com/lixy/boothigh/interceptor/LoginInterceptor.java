@@ -34,6 +34,7 @@ public class LoginInterceptor implements HandlerInterceptor {
          */
         //LoginUserVO vo = (LoginUserVO) request.getSession().getAttribute(BConstant.CURRENT_USER_KEY);
         LoginUserVO vo = new LoginUserVO();
+        vo.setMobile("48888888");
         if (vo == null || StringUtils.isBlank(vo.getMobile())) {
             response.setHeader("Content-Type", "application/json;charset=utf-8");
             response.getWriter().write("用户未登录,请登录后重试");

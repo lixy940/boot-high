@@ -13,7 +13,6 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 import org.apache.log4j.Logger;
-import sun.net.ftp.FtpProtocolException;
 
 import java.io.*;
 import java.util.StringTokenizer;

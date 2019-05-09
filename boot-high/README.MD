@@ -160,4 +160,13 @@
 server.max-http-header-size=10000000    
     
 ####增加quartz定时计划任务工具类及调用实例
-将计划任务存入数据库表中，初始化数据库表‘quartz初始化数据库.sql’    
+将计划任务存入数据库表中，初始化数据库表‘quartz初始化数据库.sql’   
+
+#### 增加https访问生成证书
+增加https访问逻辑，使用客户端生成的证书 参考：https://blog.csdn.net/u011350541/article/details/71941536
+keytool 工具分别生成服务器端和客户端
+服务器端
+keytool -genkey -alias tomcat -keypass admin123456 -keyalg RSA -keysize 1024 -validity 3650 -keystore D:/keys/tomcat.keystore -storepass admin123456
+客户端
+keytool -genkey -alias keystore -keypass admin123456 -keyalg RSA -keysize 1024 -validity 3650 -storetype PKCS12 -keystore D:/keys/keystore.p12 -storepass admin123456 
+目前项目只用到了客户端访问时证书
