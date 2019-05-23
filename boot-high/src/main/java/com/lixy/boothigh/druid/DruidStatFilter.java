@@ -3,6 +3,7 @@ package com.lixy.boothigh.druid;
 /**
  * Author：MR LIS，2019/5/23
  * Copyright(C) 2019 All rights reserved.
+ * druid监控访问地址：https://localhost:8787/druid/
  */
 
 import com.alibaba.druid.support.http.WebStatFilter;
