@@ -13,6 +13,7 @@ package com.lixy.boothigh.dao;
 
 
 import com.lixy.boothigh.bean.Student;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import java.util.Map;
  * @version    
  * @since    JDK 1.8
  */
+@Repository
 public interface IStudentDao {
 
 	/**

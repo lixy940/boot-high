@@ -1,7 +1,6 @@
 package com.lixy.boothigh;
 
 import com.lixy.boothigh.constants.BConstant;
-import com.lixy.boothigh.dynamicDataSource.DynamicDataSourceRegister;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -16,7 +15,6 @@ import java.io.File;
 
 @ServletComponentScan
 //注册动态多数据源
-@Import({DynamicDataSourceRegister.class})
 @MapperScan("com.lixy.boothigh.dao")
 @SpringBootApplication
 @EnableSwagger2/*swagger2启动*/

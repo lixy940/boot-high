@@ -27,7 +27,7 @@ import java.util.Map;
  * @version    
  * @since    JDK 1.8
  */
-@Service("studentService")
+@Service
 public class StudentServiceImpl implements IStudentService {
 
 	@Autowired
