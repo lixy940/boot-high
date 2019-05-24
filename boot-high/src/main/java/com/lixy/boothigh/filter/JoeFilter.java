@@ -43,7 +43,7 @@ public class JoeFilter implements Filter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		HttpServletRequest req = (HttpServletRequest)request;
-		logger.info(req.getRequestURL() + "---joe---> doFilter");
+//		logger.info(req.getRequestURL() + "---joe---> doFilter");
         chain.doFilter(request, response);
 	}
 
