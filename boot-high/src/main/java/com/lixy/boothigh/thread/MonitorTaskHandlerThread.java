@@ -46,6 +46,7 @@ public class MonitorTaskHandlerThread implements Runnable {
                 scanVO = opsList.rightPop(BConstant.TEMPLATE_REDIS_TASK_SCAN_KEY,10,TimeUnit.SECONDS);
                 //超时时间设置为0,表示对象不存在就一直等待，时间大于零就是在指定时间内没有返回就返回null
 //                scanVO = opsList.rightPop(BConstant.TEMPLATE_REDIS_TASK_SCAN_KEY,0, TimeUnit.SECONDS);
+//                scanVO = opsList.rightPopAndLeftPush(BConstant.TEMPLATE_REDIS_TASK_SCAN_KEY,BConstant.TEMPLATE_REDIS_TASK_SCAN_KEY,10,TimeUnit.SECONDS);
 //                logger.info("MonitorTaskHandlerThread类 uploadPathId=[{}]",uploadPathId);
                 //扫描对象为空或上传文件id为空，进行等待
                 if (scanVO == null || Objects.isNull(scanVO.getUploadPathId())) {
