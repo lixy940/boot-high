@@ -13,10 +13,8 @@ package com.lixy.boothigh.config;
 
 
 import com.lixy.boothigh.constants.BConstant;
-import com.lixy.boothigh.interceptor.JoeInterceptor;
-import com.lixy.boothigh.interceptor.LoginInterceptor;
-import com.lixy.boothigh.interceptor.PermissionInterceptor;
-import com.lixy.boothigh.interceptor.XbqInterceptor;
+import com.lixy.boothigh.interceptor.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -35,13 +33,15 @@ import java.io.File;
  */
 @Configuration
 public class MvcInterceptorConfig extends WebMvcConfigurerAdapter{
-
+	@Autowired
+	private CorsRequestInterceptor corsRequestInterceptor;
 	/**
 	 * TODO 添加spring中的拦截器.  
 	 * @see org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter#addInterceptors(org.springframework.web.servlet.config.annotation.InterceptorRegistry)
 	 */
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
+		registry.addInterceptor(corsRequestInterceptor);
 		// 拦截所有路径
 		registry.addInterceptor(new XbqInterceptor()).addPathPatterns("/**");
 		// 拦截/freemarker后路径
