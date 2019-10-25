@@ -26,6 +26,11 @@ public class CorsRequestInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
                              Object arg2) {
+
+        //高版本的springboot options可能失效，暴力使用
+        /*if (request.getMethod().toLowerCase().equals("options")) {
+            response.setStatus(200);
+        }*/
         String origin = request.getHeader("Origin");
         response.addHeader("Access-Control-Allow-Credentials", "true");
         response.addHeader("Access-Control-Allow-Origin", origin);
