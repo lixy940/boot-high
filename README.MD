@@ -169,4 +169,4 @@ keytool 工具分别生成服务器端和客户端
 keytool -genkey -alias tomcat -keypass admin123456 -keyalg RSA -keysize 1024 -validity 3650 -keystore D:/keys/tomcat.keystore -storepass admin123456
 客户端
 keytool -genkey -alias keystore -keypass admin123456 -keyalg RSA -keysize 1024 -validity 3650 -storetype PKCS12 -keystore D:/keys/keystore.p12 -storepass admin123456 
-目前项目只用到了客户端访问时证书
+目前项目只用到了客户端访问时证书 
