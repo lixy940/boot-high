@@ -71,7 +71,8 @@ public class HttpClientUtils {
                 .url(url)
                 .build();
 
-        try (Response response = OK_HTTP_CLIENT.newCall(request).execute()) {
+        try (Response response =  OKHttpClientBuilder.buildOKHttpClient()
+                .build().newCall(request).execute()) {
 
             int code = response.code();
             if (HttpStatus.OK.value() != code && HttpStatus.NO_CONTENT.value() != code) {
@@ -135,7 +136,8 @@ public class HttpClientUtils {
                 .url(url)
                 .build();
 
-        try (Response response = OK_HTTP_CLIENT.newCall(request).execute()) {
+        try (Response response =  OKHttpClientBuilder.buildOKHttpClient()
+                .build().newCall(request).execute()) {
 
             int code = response.code();
             if (HttpStatus.OK.value() != code && HttpStatus.NO_CONTENT.value() != code) {
